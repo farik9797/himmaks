@@ -115,6 +115,7 @@
       try {
         const res = await fetch(endpoint, { method: 'POST', body: new FormData(form) });
         if (!res.ok) throw new Error(res.status);
+        if (window.HM_THANKS) { location.href = window.HM_THANKS; return; }
         showState('ok');
       } catch {
         alert(T.f_err);
@@ -125,6 +126,9 @@
     }
     $('[data-wa-send]', modal).href = `https://wa.me/${window.HM_WA}?text=${encodeURIComponent(lines.join('\n'))}`;
     showState('wa');
+  });
+  $('[data-wa-send]')?.addEventListener('click', () => {
+    if (window.HM_THANKS) setTimeout(() => { location.href = window.HM_THANKS; }, 400);
   });
 
   // ---------- Главная: фоновое видео героя (не грузим на телефонах, при экономии трафика и reduced motion)
