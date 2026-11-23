@@ -623,3 +623,10 @@ html.lenis { scroll-behavior: auto !important; }
 /* Отдельные текстовые ссылки («Весь каталог», «Подробнее», «Все документы»): зона нажатия 44px */
 a.text-link { display: inline-flex; align-items: center; min-height: 44px; }
 .prose a.text-link, p a.text-link { display: inline; min-height: 0; }
+
+/* Политика конфиденциальности */
+.policy .prose { max-width: 72ch; }
+.policy-sec + .policy-sec { margin-top: 32px; }
+.policy-sec h2 { font-size: clamp(20px, 2.4vw, 24px); margin-bottom: 12px; }
+.policy-date { color: var(--ink-2); font-size: 15px; margin-bottom: 24px; }
+.consent a { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
