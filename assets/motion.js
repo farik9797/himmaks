@@ -81,6 +81,13 @@
     once: true,
     onEnter: batch => gsap.to(batch, { y: 0, autoAlpha: 1, duration: 0.7, ease, stagger: 0.06, overwrite: true }),
   });
-  // Картинки догружаются лениво: пересчитать точки срабатывания
-  window.addEventListener('load', () => ScrollTrigger.refresh());
+  // batch не вызывает onEnter для блоков, которые уже в экране при загрузке (до первой прокрутки):
+  // показываем их сами, иначе они остаются невидимыми, пока человек не начнёт листать
+  const revealInView = () => {
+    const now = items.filter(el => getComputedStyle(el).visibility === 'hidden' && el.getBoundingClientRect().top < innerHeight * 0.9);
+    if (now.length) gsap.to(now, { y: 0, autoAlpha: 1, duration: 0.7, ease, stagger: 0.06, overwrite: true });
+  };
+  requestAnimationFrame(revealInView);
+  // Картинки догружаются лениво: пересчитать точки срабатывания и показать то, что оказалось в экране
+  window.addEventListener('load', () => { ScrollTrigger.refresh(); revealInView(); });
 })();
