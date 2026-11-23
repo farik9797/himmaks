@@ -127,6 +127,14 @@
     showState('wa');
   });
 
+  // ---------- Главная: фоновое видео героя (не грузим на телефонах, при экономии трафика и reduced motion)
+  const hv = $('.hero-video');
+  if (hv && !reduce && matchMedia('(min-width: 900px)').matches && !(navigator.connection && navigator.connection.saveData)) {
+    hv.src = hv.dataset.src;
+    hv.addEventListener('playing', () => hv.classList.add('is-playing'), { once: true });
+    hv.play().catch(() => {});
+  }
+
   // ---------- Главная: лента популярных товаров
   const rail = $('.rail');
   $$('[data-rail]').forEach(btn => btn.addEventListener('click', () => {

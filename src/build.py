@@ -28,6 +28,23 @@ SITE = {
     "address": {"ru": "Павлодар, ул. Циолковского, 144/4 (офис и склады)", "kz": "Павлодар, Циолковский к-сі, 144/4 (кеңсе және қоймалар)"},
 }
 
+# Картинки оформления: кадры из коллажей клиента (src/stock), обрезка и экспорт — scratchpad export.py
+UI_IMG = {
+    "hero": (742, 418), "about": (562, 409), "apps": (742, 306), "docs": (546, 409), "molecules": (733, 324),
+    "head-product": (711, 426), "head-catalog": (562, 330),
+    "cat-promyshlennaya-himiya": (747, 249), "cat-dezsredstva": (568, 379), "cat-ochistka-vody": (540, 360),
+    "cat-pishchevye-dobavki": (540, 360), "cat-dobavki-k-betonu": (454, 303), "cat-kanistry": (486, 324),
+    "cat-rastvoriteli": (561, 373),
+}
+HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
+
+
+def ui_img(name, pre, alt="", cls="", eager=False):
+    w, h = UI_IMG[name]
+    load = 'fetchpriority="high"' if eager else 'loading="lazy"'
+    return f'<img class="{cls}" src="{pre}img/ui/{name}.webp" width="{w}" height="{h}" alt="{E(alt)}" {load} decoding="async">'
+
+
 # Группы каталога с Satu. img — фото группы, загруженное клиентом на Satu.
 CATS = [
     {"slug": "promyshlennaya-himiya", "ru": "Промышленная химия", "kz": "Өнеркәсіптік химия"},
@@ -64,7 +81,7 @@ UI = {
         "h_about": "Поставляем химию для производства, водоочистки и пищевой отрасли",
         "about_p": "«ХИММАКС» поставляет химическую продукцию и дезинфицирующие средства. Среди наших клиентов промышленные предприятия, крупные компании Казахстана, государственные учреждения и малый бизнес.",
         "about_list": ["Офис и склады в Павлодаре", "Продаём оптом и в розницу", "Отправляем по всему Казахстану", "Работаем более 6 лет"],
-        "about_link": "О компании", "about_img_alt": "Синие бочки с химической продукцией на складе",
+        "about_link": "О компании", "about_img_alt": "Склад с бочками и еврокубами на стеллажах",
         "h_popular": "Популярные товары", "prev": "Назад", "next": "Вперёд",
         "h_apps": "Для каких задач",
         "apps": [["waves", "Водоочистка и бассейны", "ochistka-vody"], ["factory", "Промышленность", "promyshlennaya-himiya"],
@@ -149,7 +166,7 @@ UI = {
         "h_about": "Өндіріске, суды тазартуға және тамақ саласына химия жеткіземіз",
         "about_p": "«ХИММАКС» химиялық өнімдер мен дезинфекциялық құралдарды жеткізеді. Клиенттеріміздің арасында өнеркәсіп кәсіпорындары, Қазақстанның ірі компаниялары, мемлекеттік мекемелер және шағын бизнес бар.",
         "about_list": ["Кеңсе мен қоймалар Павлодарда", "Көтерме және бөлшек сатамыз", "Бүкіл Қазақстанға жібереміз", "6 жылдан астам жұмыс істейміз"],
-        "about_link": "Компания туралы", "about_img_alt": "Қоймадағы химиялық өнімдері бар көк бөшкелер",
+        "about_link": "Компания туралы", "about_img_alt": "Сөрелерде бөшкелер мен еврокубтар тұрған қойма",
         "h_popular": "Танымал тауарлар", "prev": "Артқа", "next": "Алға",
         "h_apps": "Қандай міндеттерге",
         "apps": [["waves", "Суды тазарту және бассейндер", "ochistka-vody"], ["factory", "Өнеркәсіп", "promyshlennaya-himiya"],
@@ -334,10 +351,11 @@ def why_block(L):
     return f'<section class="container block block-why"><h2>{E(t["h_why"])}</h2><ul class="why">{items}</ul></section>'
 
 
-def cta_band(L, wa_text=None):
+def cta_band(L, pre, wa_text=None):
     t = UI[L]
     phones = "".join(f'<li><a href="tel:{ph["tel"]}">{ph["text"]}</a><span>{E(ph["note"][L])}</span></li>' for ph in SITE["phones"][:2])
     return f"""<section class="cta-band">
+    {ui_img('molecules', pre, cls='cta-art')}
     <div class="container cta-row">
       <div class="cta-text"><h2>{E(t['cta_h'])}</h2><p>{E(t['cta_p'])}</p>
         <div class="actions">
@@ -464,11 +482,13 @@ def render_home(L, p, goods, U):
               "telephone": [ph["text"] for ph in SITE["phones"]],
               "address": {"@type": "PostalAddress", "streetAddress": "ул. Циолковского, 144/4", "addressLocality": "Павлодар", "addressCountry": "KZ"}}
 
-    hero_img = picture({"base": "gipohlorit-natriya", "widths": [480, 800, 1029], "w": 1029, "h": 1280,
-                        "alt": {"ru": t["hero_img_alt"], "kz": t["hero_img_alt"]}}, L, pre, "(min-width: 900px) 420px, 90vw", "hero-img", True)
+    video = ""
+    if (OUT / HERO_VIDEO).exists():
+        video = (f'<video class="hero-video" muted loop playsinline preload="none" poster="{pre}img/ui/hero.webp" '
+                 f'data-src="{pre}{HERO_VIDEO}"></video>')
     facts = "".join(f'<li>{icon(ic)}<span>{E(tx)}</span></li>' for ic, tx in t["facts"])
     cats = "".join(
-        f'<li><a class="cat-card" href="{cat_url}?cat={c["slug"]}"><img src="{pre}img/cat/{c["slug"]}.webp" width="640" height="426" alt="" loading="lazy" decoding="async">'
+        f'<li><a class="cat-card" href="{cat_url}?cat={c["slug"]}">{ui_img("cat-" + c["slug"], pre)}'
         f'<span class="cat-name">{E(c[L])}</span><span class="cat-count">{counts[c["slug"]]} {plural(counts[c["slug"]], t["goods"])}</span></a></li>'
         for c in CATS)
     by_id = {g["id"]: g for g in goods}
@@ -478,6 +498,7 @@ def render_home(L, p, goods, U):
 
     body = f"""<main id="main">
   <section class="home-hero">
+    <div class="hero-bg" aria-hidden="true">{ui_img('hero', pre, cls='hero-poster', eager=True)}{video}</div>
     <div class="container hero-grid">
       <div class="hero-text">
         <h1>{E(t['hero_h'])}</h1>
@@ -488,7 +509,6 @@ def render_home(L, p, goods, U):
         </div>
         <ul class="hero-facts">{facts}</ul>
       </div>
-      <div class="hero-media">{hero_img}</div>
     </div>
   </section>
 
@@ -505,7 +525,7 @@ def render_home(L, p, goods, U):
         <ul class="about-list">{about_list}</ul>
         <a class="btn btn-primary" href="#">{E(t['about_link'])}</a>
       </div>
-      <div class="about-media"><img src="{pre}img/cat/rastvoriteli.webp" width="640" height="426" alt="{E(t['about_img_alt'])}" loading="lazy" decoding="async"></div>
+      <div class="about-media">{ui_img('about', pre, t['about_img_alt'])}</div>
     </div>
   </section>
 
@@ -517,17 +537,17 @@ def render_home(L, p, goods, U):
   </section>
 
   <section class="apps-band">
-    <img class="apps-bg" src="{pre}img/cat/ochistka-vody.webp" width="640" height="248" alt="" loading="lazy" decoding="async">
+    {ui_img('apps', pre, cls='apps-bg')}
     <div class="container apps-row"><h2>{E(t['h_apps'])}</h2><ul class="app-links">{apps}</ul></div>
   </section>
 
   <section class="container block docs-strip">
-    {icon('file-text', 'icon docs-strip-icon')}
+    {ui_img('docs', pre, cls='docs-thumb')}
     <div><h2>{E(t['h_docs'])}</h2><p>{E(t['docs_p'])}</p></div>
     <a class="btn btn-ghost" href="{wa_link(t['docs_wa'])}" target="_blank" rel="noopener">{icon('whatsapp')}{E(t['docs_btn'])}</a>
   </section>
 
-  {cta_band(L)}
+  {cta_band(L, pre)}
 </main>
 """
     return (head(L, t["home_title"], t["home_desc"], here, U["home"], "img/gipohlorit-natriya-1029.webp", [ld_org])
@@ -549,6 +569,7 @@ def render_catalog(L, p, goods, U):
 
     body = f"""<main id="main">
   <section class="product-head">
+    {ui_img('head-catalog', pre, cls='head-bg', eager=True)}
     <div class="container">
       <nav class="crumbs" aria-label="breadcrumbs"><ol><li><a href="{pre}{U['home'][L]}">{E(t['home'])}</a></li><li aria-current="page">{E(t['catalog'])}</li></ol></nav>
       <h1>{E(t['cat_h'])}</h1>
@@ -581,10 +602,10 @@ def render_catalog(L, p, goods, U):
   </div>
 
   {why_block(L)}
-  {cta_band(L)}
+  {cta_band(L, pre)}
 </main>
 """
-    return (head(L, t["cat_title"], t["cat_desc"], here, U["catalog"], "img/cat/promyshlennaya-himiya.webp", [ld_bc])
+    return (head(L, t["cat_title"], t["cat_desc"], here, U["catalog"], "img/ui/head-catalog.webp", [ld_bc])
             + header(L, here, U["catalog"], 0, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
@@ -660,6 +681,7 @@ def render_product(L, p, U):
 
     body = f"""<main id="main">
   <section class="product-head">
+    {ui_img('head-product', pre, cls='head-bg')}
     <div class="container">
       <nav class="crumbs" aria-label="breadcrumbs"><ol>
         <li><a href="{pre}{U['home'][L]}">{E(t['home'])}</a></li>
@@ -705,7 +727,7 @@ def render_product(L, p, U):
   </section>''' if docs else ''}
 
   {why_block(L)}
-  {cta_band(L, t['wa_text'].format(product=name))}
+  {cta_band(L, pre, t['wa_text'].format(product=name))}
 </main>
 
 <dialog class="modal modal-zoom" id="zoom-modal" aria-label="{E(name)}">
