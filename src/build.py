@@ -38,6 +38,7 @@ UI_IMG = {
     "banner-opt": (627, 418), "banner-new": (454, 303),
     "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375), "head-delivery": (427, 394),
 }
+PRIVACY_URL = None  # политика конфиденциальности: ссылка в подвале появится, когда клиент даст текст политики
 HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
 
 
@@ -674,7 +675,7 @@ def footer(L, here, U):
       <li class="foot-addr">{icon('map-pin')}<span>{E(SITE['address'][L])}</span></li>
       <li class="foot-addr">{icon('clock')}<span>{E(SITE['hours'][L])}</span></li></ul></div>
   </div>
-  <div class="container foot-bottom"><p>© 2026 {E(t['rights'])}</p><a href="#">{E(t['privacy'])}</a></div>
+  <div class="container foot-bottom"><p>© 2026 {E(t['rights'])}</p>{f'<a href="{pre}{PRIVACY_URL}">{E(t["privacy"])}</a>' if PRIVACY_URL else ''}</div>
 </footer>
 """
 
@@ -684,8 +685,8 @@ def quote_dialog(L, here, product=None, packs=None):
     t = UI[L]
     pre = depth_prefix(here)
     if packs:
-        pack_field = (f'<select name="pack">' + "".join(f'<option>{E(k["label"][L])}</option>' for k in packs)
-                      + f'<option value="other">{E(t["f_pack_other"])}</option></select>')
+        pack_field = (f'<span class="select"><select name="pack">' + "".join(f'<option>{E(k["label"][L])}</option>' for k in packs)
+                      + f'<option value="other">{E(t["f_pack_other"])}</option></select>{icon("chevron-down", "icon select-chev")}</span>')
     else:
         pack_field = f'<input name="pack" placeholder="{E(t["f_pack_ph"])}">'
     i18n = json.dumps({k: t[k] for k in ["f_phone_err", "f_name_err", "f_err", "wa_req", "f_product", "f_name", "f_phone",
@@ -1157,7 +1158,7 @@ def render_catalog(L, p, goods, U):
     <section class="catalog-main" aria-label="{E(t['catalog'])}">
       <div class="toolbar">
         <p class="found" aria-live="polite">{E(t['found'])} <strong data-count>{len(goods)}</strong></p>
-        <label class="sort"><span>{E(t['sort'])}</span><select name="sort"><option value="default">{E(t['sort_default'])}</option><option value="az">{E(t['sort_az'])}</option></select></label>
+        <label class="sort"><span>{E(t['sort'])}</span><span class="select"><select name="sort"><option value="default">{E(t['sort_default'])}</option><option value="az">{E(t['sort_az'])}</option></select>{icon('chevron-down', 'icon select-chev')}</span></label>
       </div>
       <ul class="cards" data-cards>{cards}</ul>
       <div class="empty" hidden data-empty><h2>{E(t['empty_h'])}</h2><p>{E(t['empty_p'])}</p>
