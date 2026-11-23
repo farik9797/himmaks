@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /spasibo/
+Disallow: /kz/rahmet/
+Disallow: /*?*q=
+Disallow: /*?*use=
+Disallow: /*?*pack=
+
+User-agent: Yandex
+Disallow: /spasibo/
+Disallow: /kz/rahmet/
+Clean-param: cat&q&use&pack /catalog/
+Clean-param: cat&q&use&pack /kz/katalog/
+
+Sitemap: https://himmaks.kz/sitemap.xml
