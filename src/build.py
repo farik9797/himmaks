@@ -574,10 +574,48 @@ def picture(img, L, pre, sizes, cls, eager):
 
 # ---------------------------------------------------------------- shared chrome
 
-def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex=False):
+def schema_graph(L, title, desc, here, og_image, ld, page_type):
+    """Один JSON-LD @graph на страницу: LocalBusiness (#org) и WebSite (#website) на всех страницах,
+    WebPage нужного типа (#webpage) со ссылками на крошки и главный объект. Узлы страницы приходят в ld."""
+    url = f"{DOMAIN}/{here}"
+    page = {"@type": page_type, "@id": f"{url}#webpage", "url": url, "name": title, "description": desc,
+            "inLanguage": UI[L]["lang"], "isPartOf": {"@id": f"{DOMAIN}/#website"},
+            "primaryImageOfPage": {"@type": "ImageObject", "url": f"{DOMAIN}/{og_image}"}}
+    if page_type in ("AboutPage", "ContactPage"):
+        page["about"] = {"@id": f"{DOMAIN}/#org"}
+    nodes = []
+    for x in ld:
+        x = {k: v for k, v in x.items() if k != "@context"}
+        kind = x.get("@type")
+        if kind == "BreadcrumbList":
+            x["@id"] = f"{url}#breadcrumb"
+            page["breadcrumb"] = {"@id": x["@id"]}
+        elif kind in ("FAQPage", "AboutPage", "ContactPage", "CollectionPage"):
+            page.update({k: v for k, v in x.items() if k not in ("@type", "@id", "url", "name")})
+            continue
+        elif kind in ("Organization", "LocalBusiness"):
+            continue  # компания описана один раз в графе
+        elif kind == "Product":
+            x["@id"] = f"{url}#product"
+            x["mainEntityOfPage"] = {"@id": page["@id"]}
+            page["mainEntity"] = {"@id": x["@id"]}
+        elif kind == "ItemList":
+            x["@id"] = f"{url}#items"
+            page["mainEntity"] = {"@id": x["@id"]}
+        nodes.append(x)
+    website = {"@type": "WebSite", "@id": f"{DOMAIN}/#website", "url": f"{DOMAIN}/", "name": "ХИММАКС",
+               "inLanguage": ["ru", "kk"], "publisher": {"@id": f"{DOMAIN}/#org"},
+               "potentialAction": {"@type": "SearchAction",
+                                   "target": {"@type": "EntryPoint", "urlTemplate": f"{DOMAIN}/catalog/?q={{search_term_string}}"},
+                                   "query-input": "required name=search_term_string"}}
+    org = {k: v for k, v in org_ld().items() if k != "@context"}
+    return {"@context": "https://schema.org", "@graph": [org, website, page] + nodes}
+
+
+def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex=False, page_type="WebPage"):
     t = UI[L]
     pre = depth_prefix(here)
-    ld_html = "".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld)
+    ld_html = f'<script type="application/ld+json">{json.dumps(schema_graph(L, title, desc, here, og_image, ld, page_type), ensure_ascii=False)}</script>'
     return f"""<!doctype html>
 <html lang="{t['lang']}" class="no-js">
 <head>
@@ -821,7 +859,9 @@ def satu_product(g, info, packs, U):
     """Товар Satu в структуре product.json (общий шаблон страницы)."""
     cat = g["cats"][0]
     props = [(k, v) for k, v in info.get("props", {}).items() if k not in PROP_KEYS - set(PROP_KZ) and v not in PROP_KEYS]
-    specs = [{"key": i < 4, "label": {"ru": k, "kz": PROP_KZ.get(k, k)}, "value": {"ru": v, "kz": v}} for i, (k, v) in enumerate(props)]
+    country_kz = {"Россия": "Ресей", "Китай": "Қытай", "Казахстан": "Қазақстан", "Иран": "Иран", "Малайзия": "Малайзия", "Германия": "Германия"}
+    specs = [{"key": i < 4, "label": {"ru": k, "kz": PROP_KZ.get(k, k)},
+              "value": {"ru": v, "kz": country_kz.get(v, v) if k == "Страна производитель" else v}} for i, (k, v) in enumerate(props)]
     # Рерайт по zhivoy-tekst (src/descriptions.json); нет рерайта: связные абзацы из описания Satu
     rw = REWRITES.get(g["id"], {})
     desc = [tuple(b) for b in rw.get("blocks", [])] or satu_description(info, g["name"])
@@ -1018,12 +1058,19 @@ def crumbs_ld(L, U, key, name):
 
 
 def org_ld():
+    """Компания: бриф (ИП, с 2020 года, регионы) и Satu (телефоны, часы, адрес, метка склада)."""
     lat, lon = GEO
     return {"@context": "https://schema.org", "@type": "LocalBusiness", "@id": f"{DOMAIN}/#org", "name": "ХИММАКС",
+            "legalName": "ИП «ХИММАКС»", "foundingDate": "2020",
+            "description": "Поставщик промышленной химии, дезинфицирующих средств, пищевых и кормовых добавок и тары. Склад в Павлодаре, доставка по Казахстану.",
             "url": DOMAIN + "/", "logo": f"{DOMAIN}/img/logo.webp", "image": f"{DOMAIN}/img/logo.webp", "email": SITE["email"],
             "telephone": SITE["phones"][0]["text"],
-            "address": {"@type": "PostalAddress", "streetAddress": "ул. Циолковского, 144/4", "addressLocality": "Павлодар", "addressCountry": "KZ"},
+            "contactPoint": [{"@type": "ContactPoint", "telephone": ph["text"], "contactType": "sales" if i < 2 else "customer service",
+                              "areaServed": "KZ", "availableLanguage": ["ru", "kk"]} for i, ph in enumerate(SITE["phones"])],
+            "address": {"@type": "PostalAddress", "streetAddress": "ул. Циолковского, 144/4", "addressLocality": "Павлодар",
+                        "addressRegion": "Павлодарская область", "addressCountry": "KZ"},
             "geo": {"@type": "GeoCoordinates", "latitude": lat, "longitude": lon},
+            "areaServed": {"@type": "Country", "name": "Казахстан"},
             "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
                                            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                                            "opens": "09:00", "closes": "17:00"}]}
@@ -1036,10 +1083,6 @@ def render_home(L, p, goods, U):
     here = U["home"][L]
     pre = depth_prefix(here)
     cat_url = pre + U["catalog"][L]
-    ld_org = {"@context": "https://schema.org", "@type": "Organization", "name": "ХИММАКС", "url": DOMAIN + "/",
-              "logo": f"{DOMAIN}/img/logo.webp", "email": SITE["email"],
-              "telephone": [ph["text"] for ph in SITE["phones"]],
-              "address": {"@type": "PostalAddress", "streetAddress": "ул. Циолковского, 144/4", "addressLocality": "Павлодар", "addressCountry": "KZ"}}
 
     video = ""
     if (OUT / HERO_VIDEO).exists():
@@ -1113,7 +1156,7 @@ def render_home(L, p, goods, U):
   {cta_band(L, pre)}
 </main>
 """
-    return (head(L, t["home_title"], t["home_desc"], here, U["home"], "img/gipohlorit-natriya-1029.webp", [ld_org])
+    return (head(L, t["home_title"], t["home_desc"], here, U["home"], "img/gipohlorit-natriya-1029.webp", [])
             + header(L, here, U["home"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
@@ -1178,7 +1221,11 @@ def render_catalog(L, p, goods, U):
   {cta_band(L, pre)}
 </main>
 """
-    return (head(L, t["cat_title"], t["cat_desc"], here, U["catalog"], "img/ui/head-catalog.webp", [ld_bc])
+    ld_items = {"@type": "ItemList", "numberOfItems": len(order), "itemListElement": [
+        {"@type": "ListItem", "position": i + 1, "url": f"{DOMAIN}/{g['urls'][L]}",
+         "name": g.get("name_kz") if L == "kz" and g.get("name_kz") else g["name"]} for i, g in enumerate(order)]}
+    return (head(L, t["cat_title"], t["cat_desc"], here, U["catalog"], "img/ui/head-catalog.webp", [ld_bc, ld_items],
+                 page_type="CollectionPage")
             + header(L, here, U["catalog"], 0, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
@@ -1211,7 +1258,14 @@ def render_product(L, p, U, goods=()):
     ld_product = {"@context": "https://schema.org", "@type": "Product", "name": name, "description": short,
                   "category": cat, "url": url,
                   "image": [f"{DOMAIN}/{img_url(i)}" for i in p["images"]],
+                  "sku": p["id"],
                   "additionalProperty": [{"@type": "PropertyValue", "name": s["label"][L], "value": s["value"][L]} for s in all_specs]}
+    country = next((s["value"][L] for s in all_specs if s["label"]["ru"] in ("Страна производства", "Страна производитель")), None)
+    if country:
+        ld_product["countryOfOrigin"] = {"@type": "Country", "name": country}
+    first_p = next((txt for tag, txt in p["description"][L] if tag == "p"), None)
+    if p.get("desc_draft") and first_p and len(first_p) > 60:
+        ld_product["description"] = first_p  # первый абзац описания полнее вводной строки
 
     imgs = p["images"]
     if imgs and imgs[0].get("file"):
@@ -1336,7 +1390,7 @@ def render_product(L, p, U, goods=()):
 </dialog>
 """
     og = img_url(imgs[0]) if imgs else "img/logo.webp"
-    return (head(L, p["seo"][L]["title"], p["seo"][L]["description"], here, PU, og, [ld_bc, ld_product], og_type="product")
+    return (head(L, p["seo"][L]["title"], p["seo"][L]["description"], here, PU, og, [ld_bc, ld_product], og_type="product", page_type="ItemPage")
             + header(L, here, PU, 0, U) + body + footer(L, here, U) + quote_dialog(L, here, name, p["packs"]))
 
 
@@ -1349,8 +1403,6 @@ def render_about(L, goods, U):
     clients = "".join(f'<li>{icon(ic)}<span>{E(x)}</span></li>' for ic, x in t["clients"])
     steps = "".join(f'<li><h3>{E(h)}</h3><p>{E(x)}</p></li>' for h, x in t["steps"])
     yard = "".join(f"<p>{E(x)}</p>" for x in t["yard"])
-    ld_page = {"@context": "https://schema.org", "@type": "AboutPage", "url": f"{DOMAIN}/{here}", "name": t["about_title"],
-               "about": {"@id": f"{DOMAIN}/#org"}}
 
     body = f"""<main id="main">
   {page_head(L, pre, U, 'about', 'head-about', t['about_h'], t['about_lead'])}
@@ -1388,7 +1440,7 @@ def render_about(L, goods, U):
 </main>
 """
     return (head(L, t["about_title"], t["about_desc"], here, U["about"], "img/ui/head-about.webp",
-                 [crumbs_ld(L, U, "about", t["about_h"]), org_ld(), ld_page])
+                 [crumbs_ld(L, U, "about", t["about_h"])], page_type="AboutPage")
             + header(L, here, U["about"], 1, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
@@ -1447,7 +1499,7 @@ def render_contacts(L, U):
 </main>
 """
     return (head(L, t["contacts_title"], t["contacts_desc"], here, U["contacts"], "img/ui/head-contacts.webp",
-                 [crumbs_ld(L, U, "contacts", t["contacts_h"]), org_ld()])
+                 [crumbs_ld(L, U, "contacts", t["contacts_h"])], page_type="ContactPage")
             + header(L, here, U["contacts"], 4, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
@@ -1553,7 +1605,7 @@ def render_faq(L, U):
 </main>
 """
     return (head(L, t["faq_title"], t["faq_desc"], here, U["faq"], "img/ui/head-catalog.webp",
-                 [crumbs_ld(L, U, "faq", t["faq_h"]), faq_ld(t["faq"])])
+                 [crumbs_ld(L, U, "faq", t["faq_h"]), faq_ld(t["faq"])], page_type="FAQPage")
             + header(L, here, U["faq"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
