@@ -38,6 +38,7 @@ UI_IMG = {
     "banner-opt": (627, 418), "banner-new": (454, 303),
     "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375), "head-delivery": (427, 394),
 }
+SITE_BASE = "/himmaks/"  # корень сайта для 404.html: превью на GitHub Pages; на рабочем домене "/"
 PRIVACY_URL = True  # политика конфиденциальности: src/privacy.json (проект, проверить юристу)
 HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
 
@@ -1576,6 +1577,68 @@ def render_privacy(L, U):
             + header(L, here, U["privacy"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
+T404 = {
+    "ru": {"title": "Страница не найдена | ХИММАКС", "h1": "Такой страницы нет",
+           "lead": "Возможно, товар переехал в другую группу или в адресе опечатка. Найдите его через поиск или напишите нам.",
+           "search": "Поиск по каталогу", "search_ph": "Например, сода или перекись", "go": "Найти",
+           "catalog": "Перейти в каталог", "home": "На главную", "groups": "Группы каталога"},
+    "kz": {"title": "Бет табылмады | ХИММАКС", "h1": "Мұндай бет жоқ",
+           "lead": "Тауар басқа топқа ауысқан немесе мекенжайда қате болуы мүмкін. Оны іздеу арқылы табыңыз немесе бізге жазыңыз.",
+           "search": "Каталог бойынша іздеу", "search_ph": "Мысалы, сода немесе асқын тотық", "go": "Табу",
+           "catalog": "Каталогқа өту", "home": "Басты бетке", "groups": "Каталог топтары"},
+}
+
+
+def render_404(U):
+    """404.html в корне: GitHub Pages отдаёт её на любой несуществующий адрес, поэтому пути абсолютные от SITE_BASE.
+    Разметка на русском; если адрес начинается с /kz/, скрипт подставляет казахские тексты и ссылки."""
+    L, t, r = "ru", UI["ru"], T404["ru"]
+    kz = {k: T404["kz"][k] for k in ("title", "h1", "lead", "search", "search_ph", "go", "catalog", "home", "groups")}
+    kz_links = {"catalog": U["catalog"]["kz"], "home": U["home"]["kz"]}
+    groups = "".join(f'<li><a class="chip" href="{U["catalog"]["ru"]}?cat={c["slug"]}" data-kz-href="{U["catalog"]["kz"]}?cat={c["slug"]}" '
+                     f'data-kz="{E(c["kz"])}">{E(c["ru"])}</a></li>' for c in CATS)
+    body = f"""<main id="main">
+  <section class="product-head page-404">
+    {ui_img('head-catalog', '', cls='head-bg', eager=True)}
+    <div class="container">
+      <p class="code-404" aria-hidden="true">404</p>
+      <h1 data-t="h1">{E(r['h1'])}</h1>
+      <p class="lead" data-t="lead">{E(r['lead'])}</p>
+      <form class="search search-404" action="{U['catalog']['ru']}" method="get" role="search" data-kz-action="{U['catalog']['kz']}">
+        <label><span class="visually-hidden" data-t="search">{E(r['search'])}</span>{icon('search-check')}
+        <input type="search" name="q" placeholder="{E(r['search_ph'])}" data-t-ph="search_ph" autocomplete="off"></label>
+      </form>
+      <div class="actions actions-404">
+        <a class="btn btn-primary" href="{U['catalog']['ru']}" data-link="catalog" data-t="catalog">{E(r['catalog'])}</a>
+        <a class="btn btn-ghost btn-on-dark" href="{U['home']['ru']}" data-link="home" data-t="home">{E(r['home'])}</a>
+      </div>
+    </div>
+  </section>
+  <section class="container block">
+    <h2 data-t="groups">{E(r['groups'])}</h2>
+    <ul class="chips">{groups}</ul>
+  </section>
+</main>
+<script>(function(){{
+  if (location.pathname.indexOf("/kz/") === -1 && !/\\/kz$/.test(location.pathname)) return;
+  var T = {json.dumps(kz, ensure_ascii=False)}, H = {json.dumps(kz_links)}, B = "{SITE_BASE}";
+  document.documentElement.lang = "kk"; document.title = T.title;
+  document.querySelectorAll("[data-t]").forEach(function(el){{ el.textContent = T[el.dataset.t]; }});
+  document.querySelectorAll("[data-t-ph]").forEach(function(el){{ el.placeholder = T[el.dataset.tPh]; }});
+  document.querySelectorAll("[data-link]").forEach(function(a){{ a.href = B + H[a.dataset.link]; }});
+  document.querySelectorAll("[data-kz]").forEach(function(a){{ a.textContent = a.dataset.kz; a.href = B + a.dataset.kzHref; }});
+  var f = document.querySelector("[data-kz-action]"); if (f) f.action = B + f.dataset.kzAction;
+}})();</script>
+"""
+    html_ = (head(L, r["title"], r["lead"], "", U["home"], "img/logo.webp", noindex=True)
+             + header(L, "", U["home"], -1, U) + body + footer(L, "", U) + quote_dialog(L, ""))
+    # относительные пути -> абсолютные от корня сайта
+    html_ = re.sub(r'(\s(?:href|src|action|data-src|poster)=")(?!https?:|/|#|mailto:|tel:|data:)([^"]*)"',
+                   lambda m: f'{m.group(1)}{SITE_BASE}{m.group(2)}"', html_)
+    # у 404 нет канонического адреса и языковых пар
+    return re.sub(r'<link rel="(?:canonical|alternate)"[^>]*>\n?', "", html_)
+
+
 def main():
     p = json.loads((SRC / "product.json").read_text())
     U = urls(p)
@@ -1607,6 +1670,9 @@ def main():
             out.write_text(render_product(L, prod, U, goods))
         pages.append(g["urls"])
     print("→ товаров:", sum(1 for g in goods if not g["page"]), "x 2 языка")
+
+    (OUT / "404.html").write_text(render_404(U))
+    print("→ site/404.html")
 
     # sitemap.xml с парами RU/KZ (hreflang)
     rows = []
