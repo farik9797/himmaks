@@ -815,7 +815,9 @@ def satu_product(g, info, packs, U):
     props = [(k, v) for k, v in info.get("props", {}).items() if k not in PROP_KEYS - set(PROP_KZ) and v not in PROP_KEYS]
     specs = [{"key": i < 4, "label": {"ru": k, "kz": PROP_KZ.get(k, k)}, "value": {"ru": v, "kz": v}} for i, (k, v) in enumerate(props)]
     # Рерайт по zhivoy-tekst (src/descriptions.json); нет рерайта: связные абзацы из описания Satu
-    desc = [tuple(b) for b in REWRITES.get(g["id"], {}).get("blocks", [])] or satu_description(info, g["name"])
+    rw = REWRITES.get(g["id"], {})
+    desc = [tuple(b) for b in rw.get("blocks", [])] or satu_description(info, g["name"])
+    desc_kz = [tuple(b) for b in rw.get("blocks_kz", [])]
     pk_ru = ", ".join(g["packs"])
     return {
         "id": g["id"], "_urls": g["urls"],
@@ -829,8 +831,8 @@ def satu_product(g, info, packs, U):
         "images": [{"file": f"p/{g['id']}.webp", "w": 480, "h": 480, "alt": {"ru": g["name"], "kz": g["name"]}}],
         "specs": specs,
         "packs": [{"label": {"ru": x, "kz": pack_text([x], "kz")}} for x in g["packs"]],
-        "description": {"ru": desc, "kz": desc},
-        "desc_lang": {"kz": "ru"}, "desc_draft": True,
+        "description": {"ru": desc, "kz": desc_kz or desc},
+        "desc_lang": {} if desc_kz else {"kz": "ru"}, "desc_draft": True,
         "applications": [{"icon": USE_ICON[k], "title": lbl, "text": {"ru": "", "kz": ""}} for k, lbl, _ in USES if k in g["uses"]],
         "documents": [{"placeholder": False, "file": None, "format": None, "size": None, "type": d, "title": d} for d in (
             {"ru": "Паспорт качества", "kz": "Сапа паспорты"}, {"ru": "Паспорт безопасности (SDS)", "kz": "Қауіпсіздік паспорты (SDS)"},
@@ -1305,7 +1307,7 @@ def render_product(L, p, U, goods=()):
     {f'<section id="{ids[1]}" class="block block-apps"><h2>{E(t["h_papps"])}</h2><ul class="apps">{apps_html}</ul></section>' if apps else ''}
   </div>
 
-  <div class="band-light"><div class="container content-grid">
+  <div class="band-light band-panels"><div class="container content-grid">
     {f'<section id="{ids[2]}" class="block"><h2>{E(t["h_specs"])}</h2><dl class="specs specs-full">{dl(all_specs)}</dl></section>' if all_specs else ''}
     {f'<section id="{ids[3]}" class="block"><h2>{E(t["h_storage"])}</h2><dl class="specs specs-full">{dl(storage)}</dl></section>' if storage else ''}
   </div></div>
