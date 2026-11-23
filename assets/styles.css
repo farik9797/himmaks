@@ -283,6 +283,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .site-footer a { color: var(--ink-on-dark-2); text-decoration: none; }
 .site-footer a:hover { color: var(--ink-on-dark); }
 .foot-contacts a, .foot-addr { display: inline-flex; gap: 8px; align-items: flex-start; }
+.foot-contacts a { min-height: 44px; padding-block: 12px; margin-block: -12px; }
 .foot-contacts .icon { width: 18px; height: 18px; margin-top: 4px; }
 .foot-contacts small { display: block; font-size: 13px; }
 .foot-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 48px; padding-block: 24px; border-top: 1px solid var(--navy-800); font-size: 14px; }
@@ -381,7 +382,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .cat-card img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 .cat-grid li:first-child:nth-last-child(odd) .cat-card img { aspect-ratio: 3 / 1; }
 @media (max-width: 767px) { .cat-grid li:first-child:nth-last-child(odd) .cat-card img { aspect-ratio: 2 / 1; } }
-.cat-name { padding: 16px 16px 4px; font-weight: 600; line-height: 1.3; }
+.cat-name { padding: 16px 16px 4px; font-weight: 600; line-height: 1.3; overflow-wrap: break-word; hyphens: auto; }
 .cat-count { padding: 0 16px 16px; font-size: 14px; color: var(--blue-600); }
 
 .about-panel { display: grid; grid-template-columns: minmax(0, 1fr); border-radius: var(--r-lg); overflow: hidden; background: var(--navy-900); color: var(--ink-on-dark); }
@@ -558,7 +559,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 @media (min-width: 900px) { .banner-media img { aspect-ratio: auto; min-height: 320px; } }
 .banner-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
 .banner-dots { display: flex; gap: 4px; }
-.banner-dot { width: 32px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
+.banner-dot { width: 44px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
 .banner-dot::before { content: ""; width: 24px; height: 4px; border-radius: var(--r-pill); background: var(--line); transition: background-color .15s ease; }
 .banner-dot[aria-current="true"]::before { background: var(--brand-red); }
 .banner-dot:hover::before { background: var(--ink-2); }
@@ -611,3 +612,14 @@ html.lenis { scroll-behavior: auto !important; }
 .band-panels .content-grid > .block { padding: 32px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); }
 @media (max-width: 639px) { .band-panels .content-grid { padding-block: 40px; } .band-panels .content-grid > .block { padding: 24px 20px; } }
 .band-panels .specs-full .spec-row:last-child { border-bottom: 0; }
+
+/* Выпадающие списки: своя стрелка с отступом вместо системной у самого края */
+.select { position: relative; display: inline-flex; align-items: center; width: 100%; }
+.sort .select { width: auto; }
+.select select { appearance: none; -webkit-appearance: none; width: 100%; padding-right: 44px; cursor: pointer; }
+.select-chev { position: absolute; right: 14px; width: 18px; height: 18px; color: var(--ink-2); pointer-events: none; }
+.select:hover .select-chev { color: var(--ink); }
+
+/* Отдельные текстовые ссылки («Весь каталог», «Подробнее», «Все документы»): зона нажатия 44px */
+a.text-link { display: inline-flex; align-items: center; min-height: 44px; }
+.prose a.text-link, p a.text-link { display: inline; min-height: 0; }
