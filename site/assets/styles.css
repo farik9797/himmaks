@@ -364,8 +364,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   .hero-bg::after { background: linear-gradient(180deg, var(--veil) 0%, var(--navy-900) 100%); }
 }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
-.hero-text { max-width: 640px; }
-.hero-text h1 { font-size: clamp(34px, 5vw, 60px); max-width: 15ch; }
+.hero-text { max-width: 775px; }
+.hero-text h1 { font-size: clamp(34px, 5vw, 60px); }
 .home-hero .lead { margin-top: 20px; max-width: 44ch; font-size: 19px; color: var(--ink-on-dark-2); }
 .hero-actions { margin-top: 32px; max-width: 520px; }
 .hero-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--glass-line); }
