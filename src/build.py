@@ -35,7 +35,7 @@ UI_IMG = {
     "cat-promyshlennaya-himiya": (747, 249), "cat-dezsredstva": (568, 379), "cat-ochistka-vody": (540, 360),
     "cat-pishchevye-dobavki": (540, 360), "cat-dobavki-k-betonu": (454, 303), "cat-kanistry": (486, 324),
     "cat-rastvoriteli": (561, 373),
-    "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375),
+    "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375), "head-delivery": (427, 394),
 }
 HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
 
@@ -231,6 +231,26 @@ UI = {
     },
 }
 
+# Регионы доставки: himmaks.kz/delivery_info (Satu). Город без списка — область целиком.
+REGIONS = [
+    ({"ru": "Акмолинская область", "kz": "Ақмола облысы"},
+     {"ru": ["Астана", "Кокшетау", "Степногорск", "Щучинск", "Макинск", "Ерейментау", "Есиль", "Атбасар", "Державинск", "Акколь"],
+      "kz": ["Астана", "Көкшетау", "Степногорск", "Щучинск", "Макинск", "Ерейментау", "Есіл", "Атбасар", "Державинск", "Ақкөл"]}),
+    ({"ru": "Алматинская область", "kz": "Алматы облысы"},
+     {"ru": ["Алматы", "Конаев", "Талгар", "Каскелен", "Есик"], "kz": ["Алматы", "Қонаев", "Талғар", "Қаскелең", "Есік"]}),
+    ({"ru": "Абайская область", "kz": "Абай облысы"},
+     {"ru": ["Семей", "Курчатов", "Аягоз", "Чарск"], "kz": ["Семей", "Курчатов", "Аягөз", "Шар"]}),
+    ({"ru": "Жетысуская область", "kz": "Жетісу облысы"},
+     {"ru": ["Талдыкорган", "Текели", "Жаркент", "Уштобе", "Сарканд", "Ушарал"], "kz": ["Талдықорған", "Текелі", "Жаркент", "Үштөбе", "Сарқан", "Үшарал"]}),
+    ({"ru": "Улытауская область", "kz": "Ұлытау облысы"},
+     {"ru": ["Жезказган", "Сатпаев", "Каражал"], "kz": ["Жезқазған", "Сәтбаев", "Қаражал"]}),
+    ({"ru": "Северо-Казахстанская область", "kz": "Солтүстік Қазақстан облысы"}, {"ru": ["Петропавловск"], "kz": ["Петропавл"]}),
+    ({"ru": "Павлодарская область", "kz": "Павлодар облысы"}, None),
+    ({"ru": "Карагандинская область", "kz": "Қарағанды облысы"}, None),
+    ({"ru": "Костанайская область", "kz": "Қостанай облысы"}, None),
+    ({"ru": "Восточно-Казахстанская область", "kz": "Шығыс Қазақстан облысы"}, None),
+]
+
 # Склад на карте: метка с карты на странице контактов Satu (himmaks.kz/contacts)
 GEO = (52.2716168, 76.9979234)
 
@@ -311,6 +331,87 @@ UI["kz"].update({
 })
 
 
+# «Документация» и «Доставка и оплата». Условия: himmaks.kz/delivery_info, отзыв: himmaks.kz/testimonials (Satu), 23.11.2026
+UI["ru"].update({
+    "docs_title": "Документы на химическую продукцию ХИММАКС: паспорта качества, SDS, сертификаты",
+    "docs_desc": "Паспорта качества, паспорта безопасности, сертификаты и технические условия на химическую продукцию ХИММАКС. Присылаем по запросу.",
+    "docs_h": "Документация",
+    "docs_lead": "Паспорта качества, паспорта безопасности и сертификаты на товары. Присылаем по запросу.",
+    "docs_note_h": "Как получить документ", "doc_types_h": "Какие документы присылаем",
+    "docs_note": [
+        "Набор документов зависит от товара и партии, поэтому общий архив мы не выкладываем. Присылаем то, что есть на нужный вам товар.",
+        "Напишите название товара и какой документ нужен. Менеджер пришлёт файлы в WhatsApp или на почту.",
+    ],
+    "doc_types": [
+        ["kachestvo", "flask-conical", "Паспорт качества", "Документ на конкретную партию: результаты анализа по показателям из ГОСТ или ТУ."],
+        ["bezopasnost", "shield-alert", "Паспорт безопасности (SDS)", "Опасные свойства вещества, первая помощь, условия хранения и перевозки, действия при разливе."],
+        ["sertifikaty", "badge-check", "Сертификаты и декларации", "Подтверждают, что продукция соответствует техническим регламентам."],
+        ["tehnicheskie", "file-text", "Технические документы", "ГОСТ или технические условия, по которым выпущен продукт, и инструкции по применению."],
+    ],
+    "doc_req": "Запросить", "doc_req_wa": "Здравствуйте! Нужен документ «{doc}» на товар: ",
+    "docs_strip_h": "Не знаете, какой документ нужен?",
+    "docs_strip_p": "Расскажите, для чего: тендер, лаборатория, склад. Менеджер подскажет.",
+    "delivery_title": "Доставка и оплата химической продукции ХИММАКС по Казахстану",
+    "delivery_desc": "Самовывоз со склада в Павлодаре, курьер, транспортные компании по Казахстану. Оплата наличными или переводом на счёт, отгрузка после предоплаты.",
+    "delivery_h": "Доставка и оплата",
+    "delivery_lead": "Отгружаем со склада в Павлодаре по всему Казахстану. Заказ отправляем после предоплаты.",
+    "ways_h": "Как получить заказ",
+    "ways": [
+        ["warehouse", "Самовывоз", "Со склада в Павлодаре, ул. Циолковского, 144/4. Пн-Пт: 9:00-17:00."],
+        ["truck", "Курьер", "Привезём по вашему адресу. Стоимость доставки 10 000 ₸."],
+        ["package", "Транспортная компания", "Отправим в ваш город. Срок и стоимость посчитает менеджер."],
+    ],
+    "pay_h": "Оплата",
+    "pay": [["banknote", "Наличными", ""], ["landmark", "Переводом на счёт", "Реквизиты пришлёт менеджер."]],
+    "prepay": "Доставка только по предоплате.",
+    "regions_h": "Регионы доставки",
+    "regions_p": "Вашего города нет в списке? Напишите, посчитаем отправку.",
+    "review_h": "Из отзывов на Satu.kz",
+    "review": {"text": "Сделала заказ, перезвонили в течении 5 минут. И уже в течении 1 часа, доставили товар по г. Павлодар. Менеджер был очень вежливо и компетентен.",
+               "who": "Татьяна, 11.03.2025, заказ медного купороса"},
+    "review_src": "Все отзывы на Satu.kz",
+})
+UI["kz"].update({
+    "docs_title": "ХИММАКС химиялық өнімдеріне құжаттар: сапа паспорттары, SDS, сертификаттар",
+    "docs_desc": "ХИММАКС химиялық өнімдеріне сапа паспорттары, қауіпсіздік паспорттары, сертификаттар және техникалық шарттар. Сұрау бойынша жібереміз.",
+    "docs_h": "Құжаттама",
+    "docs_lead": "Тауарларға сапа паспорттары, қауіпсіздік паспорттары және сертификаттар. Сұрау бойынша жібереміз.",
+    "docs_note_h": "Құжатты қалай алуға болады", "doc_types_h": "Қандай құжаттар жібереміз",
+    "docs_note": [
+        "Құжаттар жинағы тауар мен партияға байланысты, сондықтан ортақ мұрағат жарияламаймыз. Сізге қажет тауарға барын жібереміз.",
+        "Тауар атауын және қандай құжат керегін жазыңыз. Менеджер файлдарды WhatsApp-қа немесе поштаға жібереді.",
+    ],
+    "doc_types": [
+        ["kachestvo", "flask-conical", "Сапа паспорты", "Нақты партияға құжат: МЕМСТ немесе ТШ көрсеткіштері бойынша талдау нәтижелері."],
+        ["bezopasnost", "shield-alert", "Қауіпсіздік паспорты (SDS)", "Заттың қауіпті қасиеттері, алғашқы көмек, сақтау және тасымалдау шарттары, төгілген кездегі әрекеттер."],
+        ["sertifikaty", "badge-check", "Сертификаттар мен декларациялар", "Өнімнің техникалық регламенттерге сәйкестігін растайды."],
+        ["tehnicheskie", "file-text", "Техникалық құжаттар", "Өнім шығарылған МЕМСТ немесе техникалық шарттар және қолдану нұсқаулықтары."],
+    ],
+    "doc_req": "Сұрау", "doc_req_wa": "Сәлеметсіз бе! Тауарға «{doc}» құжаты керек: ",
+    "docs_strip_h": "Қандай құжат керегін білмейсіз бе?",
+    "docs_strip_p": "Не үшін керегін айтыңыз: тендер, зертхана, қойма. Менеджер кеңес береді.",
+    "delivery_title": "ХИММАКС химиялық өнімдерін Қазақстан бойынша жеткізу және төлем",
+    "delivery_desc": "Павлодардағы қоймадан өзі алып кету, курьер, Қазақстан бойынша көлік компаниялары. Қолма-қол немесе шотқа аудару арқылы төлем, алдын ала төлемнен кейін жөнелту.",
+    "delivery_h": "Жеткізу және төлем",
+    "delivery_lead": "Павлодардағы қоймадан бүкіл Қазақстанға жөнелтеміз. Тапсырысты алдын ала төлемнен кейін жібереміз.",
+    "ways_h": "Тапсырысты қалай алуға болады",
+    "ways": [
+        ["warehouse", "Өзі алып кету", "Павлодардағы қоймадан, Циолковский к-сі, 144/4. Дүйсенбі-жұма: 9:00-17:00."],
+        ["truck", "Курьер", "Сіздің мекенжайыңызға жеткіземіз. Жеткізу құны 10 000 ₸."],
+        ["package", "Көлік компаниясы", "Сіздің қалаңызға жібереміз. Мерзімі мен құнын менеджер есептейді."],
+    ],
+    "pay_h": "Төлем",
+    "pay": [["banknote", "Қолма-қол", ""], ["landmark", "Шотқа аудару", "Деректемелерді менеджер жібереді."]],
+    "prepay": "Жеткізу тек алдын ала төлем бойынша.",
+    "regions_h": "Жеткізу өңірлері",
+    "regions_p": "Қалаңыз тізімде жоқ па? Жазыңыз, жөнелтуді есептейміз.",
+    "review_h": "Satu.kz-тегі пікірлерден",
+    "review": {"text": "Сделала заказ, перезвонили в течении 5 минут. И уже в течении 1 часа, доставили товар по г. Павлодар. Менеджер был очень вежливо и компетентен.",
+               "who": "Татьяна, 11.03.2025, мыс купоросына тапсырыс"},
+    "review_src": "Satu.kz-тегі барлық пікірлер",
+})
+
+
 # ---------------------------------------------------------------- helpers
 
 def icon(name, cls="icon"):
@@ -348,6 +449,8 @@ def urls(p):
         "catalog": {"ru": "catalog/", "kz": "kz/katalog/"},
         "about": {"ru": "o-kompanii/", "kz": "kz/kompaniya-turaly/"},
         "contacts": {"ru": "kontakty/", "kz": "kz/baylanys/"},
+        "docs": {"ru": "dokumentaciya/", "kz": "kz/qujattama/"},
+        "delivery": {"ru": "dostavka-i-oplata/", "kz": "kz/zhetkizu-zhane-tolem/"},
         "product": {"ru": f"catalog/{p['category']['ru']['slug']}/{p['slug']['ru']}/",
                     "kz": f"kz/katalog/{p['category']['kz']['slug']}/{p['slug']['kz']}/"},
     }
@@ -404,7 +507,7 @@ def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex
 def header(L, here, alts, active, U):
     t = UI[L]
     pre = depth_prefix(here)
-    targets = [U["catalog"][L], U["about"][L], None, None, U["contacts"][L]]
+    targets = [U["catalog"][L], U["about"][L], U["docs"][L], U["delivery"][L], U["contacts"][L]]
     nav = "".join(
         f'<li><a href="{pre + targets[i] if targets[i] is not None else "#"}"{" aria-current=\"page\"" if i == active else ""}>{E(n)}</a></li>'
         for i, n in enumerate(t["nav"]))
@@ -455,9 +558,10 @@ def footer(L, here, U):
     pre = depth_prefix(here)
     cat_url = pre + U["catalog"][L]
     cats = "".join(f'<li><a href="{cat_url}?cat={c["slug"]}">{E(c[L])}</a></li>' for c in CATS)
-    comp_href = [pre + U["about"][L], "#", pre + U["contacts"][L]]
+    comp_href = [pre + U["about"][L], pre + U["delivery"][L], pre + U["contacts"][L]]
     comp = "".join(f'<li><a href="{h}">{E(c)}</a></li>' for c, h in zip(t["foot_company_links"], comp_href))
-    docs = "".join(f'<li><a href="#">{E(c)}</a></li>' for c in t["foot_docs_links"])
+    doc_ids = ["sertifikaty", "bezopasnost", "tehnicheskie"]
+    docs = "".join(f'<li><a href="{pre}{U["docs"][L]}#{i}">{E(c)}</a></li>' for c, i in zip(t["foot_docs_links"], doc_ids))
     phones = "".join(f'<li><a href="tel:{ph["tel"]}">{icon("phone")}<span>{ph["text"]}<small>{E(ph["note"][L])}</small></span></a></li>' for ph in SITE["phones"])
     return f"""<footer class="site-footer">
   <div class="container foot-grid">
@@ -841,7 +945,7 @@ def render_product(L, p, U):
   </div></div>
 
   {f'''<section id="{ids[4]}" class="container block block-docs">
-    <div class="block-head"><h2>{E(t["h_pdocs"])}</h2><a class="text-link" href="#">{E(t["docs_all"])}</a></div>
+    <div class="block-head"><h2>{E(t["h_pdocs"])}</h2><a class="text-link" href="{pre}{U["docs"][L]}">{E(t["docs_all"])}</a></div>
     <ul class="docs">{"".join(doc_row(d) for d in docs)}</ul>
   </section>''' if docs else ''}
 
@@ -962,6 +1066,87 @@ def render_contacts(L, U):
             + header(L, here, U["contacts"], 4, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
+def render_docs(L, U):
+    t = UI[L]
+    here = U["docs"][L]
+    pre = depth_prefix(here)
+    note = "".join(f"<p>{E(x)}</p>" for x in t["docs_note"])
+    types = "".join(
+        f'<li class="info-card" id="{i}"><div class="c-head">{icon(ic)}<h3>{E(h)}</h3></div><p>{E(x)}</p>'
+        f'<a class="btn btn-ghost btn-sm" href="{wa_link(t["doc_req_wa"].format(doc=h))}" target="_blank" rel="noopener">{icon("whatsapp")}{E(t["doc_req"])}</a></li>'
+        for i, ic, h, x in t["doc_types"])
+
+    body = f"""<main id="main">
+  {page_head(L, pre, U, 'docs', 'docs', t['docs_h'], t['docs_lead'])}
+
+  <section class="container block">
+    <h2>{E(t['doc_types_h'])}</h2>
+    <ul class="info-grid info-grid-2">{types}</ul>
+  </section>
+
+  <div class="band-light"><div class="container content-grid">
+    <section class="block"><h2>{E(t['docs_note_h'])}</h2><div class="prose">{note}</div></section>
+    <section class="block docs-ask">
+      <h2 class="h-sm">{E(t['docs_strip_h'])}</h2><p>{E(t['docs_strip_p'])}</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="{wa_link(t['docs_wa'])}" target="_blank" rel="noopener">{icon('whatsapp')}{E(t['docs_btn'])}</a>
+        <a class="btn btn-ghost" href="mailto:{SITE['email']}">{icon('mail')}{SITE['email']}</a>
+      </div>
+    </section>
+  </div></div>
+
+  {cta_band(L, pre)}
+</main>
+"""
+    return (head(L, t["docs_title"], t["docs_desc"], here, U["docs"], "img/ui/docs.webp", [crumbs_ld(L, U, "docs", t["docs_h"])])
+            + header(L, here, U["docs"], 2, U) + body + footer(L, here, U) + quote_dialog(L, here))
+
+
+def render_delivery(L, U):
+    t = UI[L]
+    here = U["delivery"][L]
+    pre = depth_prefix(here)
+    ways = "".join(f'<li class="info-card"><div class="c-head">{icon(ic)}<h3>{E(h)}</h3></div><p>{E(x)}</p></li>' for ic, h, x in t["ways"])
+    pay = "".join(f'<li><div class="c-head">{icon(ic)}<h3>{E(h)}</h3></div>{f"<p>{E(x)}</p>" if x else ""}</li>' for ic, h, x in t["pay"])
+    regions = "".join(
+        f'<li><h3>{E(r[L])}</h3>{"<p>" + E(", ".join(c[L])) + "</p>" if c else ""}</li>' for r, c in REGIONS)
+    rv = t["review"]
+
+    body = f"""<main id="main">
+  {page_head(L, pre, U, 'delivery', 'head-delivery', t['delivery_h'], t['delivery_lead'])}
+
+  <section class="container block">
+    <h2>{E(t['ways_h'])}</h2>
+    <ul class="info-grid info-grid-3">{ways}</ul>
+  </section>
+
+  <div class="band-light"><div class="container content-grid">
+    <section class="block"><h2>{E(t['pay_h'])}</h2>
+      <ul class="pay-list">{pay}</ul>
+      <p class="prepay">{icon('circle-check')}<span>{E(t['prepay'])}</span></p>
+    </section>
+    <section class="block" aria-labelledby="review-h">
+      <h2 id="review-h" class="h-sm">{E(t['review_h'])}</h2>
+      <figure class="review">{icon('quote', 'icon review-mark')}<blockquote lang="ru"><p>{E(rv['text'])}</p></blockquote>
+        <figcaption>{E(rv['who'])}</figcaption></figure>
+      <a class="text-link" href="https://himmaks.kz/testimonials" target="_blank" rel="noopener">{E(t['review_src'])}</a>
+    </section>
+  </div></div>
+
+  <section class="container block">
+    <div class="block-head"><h2>{E(t['regions_h'])}</h2></div>
+    <ul class="regions">{regions}</ul>
+    <p class="c-note">{E(t['regions_p'])}</p>
+  </section>
+
+  {cta_band(L, pre)}
+</main>
+"""
+    return (head(L, t["delivery_title"], t["delivery_desc"], here, U["delivery"], "img/ui/head-delivery.webp",
+                 [crumbs_ld(L, U, "delivery", t["delivery_h"])])
+            + header(L, here, U["delivery"], 3, U) + body + footer(L, here, U) + quote_dialog(L, here))
+
+
 def main():
     p = json.loads((SRC / "product.json").read_text())
     U = urls(p)
@@ -969,7 +1154,8 @@ def main():
     for L in ("ru", "kz"):
         for kind, html_ in (("home", render_home(L, p, goods, U)), ("catalog", render_catalog(L, p, goods, U)),
                             ("product", render_product(L, p, U)), ("about", render_about(L, goods, U)),
-                            ("contacts", render_contacts(L, U))):
+                            ("contacts", render_contacts(L, U)), ("docs", render_docs(L, U)),
+                            ("delivery", render_delivery(L, U))):
             out = OUT / U[kind][L] / "index.html"
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(html_)
