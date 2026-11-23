@@ -95,7 +95,7 @@ UI = {
         "docs_btn": "Запросить документы", "docs_wa": "Здравствуйте! Нужны документы на товар: ",
         "h_questions": "Остались вопросы?",
         "questions_p": "Поможем подобрать продукцию и посчитать поставку.",
-        "ask": "Задать вопрос",
+        "ask": "Связаться с менеджером",
         # каталог
         "cat_title": "Каталог химической продукции ХИММАКС: цены по запросу, склад в Павлодаре",
         "cat_desc": "Промышленная химия, дезинфицирующие средства, пищевые добавки, добавки к бетону и тара. Склад в Павлодаре, доставка по Казахстану.",
@@ -124,7 +124,7 @@ UI = {
         ],
         "cta_h": "Нужна консультация или подбор продукции?",
         "cta_p": "Свяжитесь с менеджером: поможем уточнить характеристики, фасовку, наличие и условия поставки.",
-        "cta_btn": "Связаться с нами",
+        "cta_btn": "Связаться с менеджером",
         # форма
         "f_title": "Запрос цены", "f_title_general": "Заявка менеджеру", "f_product": "Товар", "f_product_ph": "Какой товар интересует",
         "f_name": "Имя", "f_phone": "Телефон",
@@ -182,7 +182,7 @@ UI = {
         "docs_btn": "Құжаттарды сұрау", "docs_wa": "Сәлеметсіз бе! Тауарға құжаттар керек: ",
         "h_questions": "Сұрақтарыңыз бар ма?",
         "questions_p": "Өнімді таңдауға және жеткізуді есептеуге көмектесеміз.",
-        "ask": "Сұрақ қою",
+        "ask": "Менеджермен байланысу",
         "cat_title": "ХИММАКС химиялық өнімдер каталогы: бағасы сұрау бойынша, қойма Павлодарда",
         "cat_desc": "Өнеркәсіптік химия, дезинфекциялық құралдар, тағамдық қоспалар, бетонға арналған қоспалар және ыдыс. Қойма Павлодарда, Қазақстан бойынша жеткізу.",
         "cat_h": "Өнім каталогы",
@@ -209,7 +209,7 @@ UI = {
         ],
         "cta_h": "Кеңес немесе өнім таңдау керек пе?",
         "cta_p": "Менеджерге хабарласыңыз: сипаттамаларды, қаптаманы, қолда барын және жеткізу шарттарын нақтылауға көмектесеміз.",
-        "cta_btn": "Бізбен байланысу",
+        "cta_btn": "Менеджермен байланысу",
         "f_title": "Бағасын сұрау", "f_title_general": "Менеджерге өтінім", "f_product": "Тауар", "f_product_ph": "Қандай тауар қызықтырады",
         "f_name": "Атыңыз", "f_phone": "Телефон",
         "f_pack": "Көлемі немесе қаптамасы", "f_pack_ph": "Мысалы, 200 кг немесе 10 канистр", "f_pack_other": "Басқа көлем, түсініктемеде жазамын",
@@ -576,7 +576,7 @@ def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex
 <meta property="og:image" content="{DOMAIN}/{og_image}">
 <meta name="theme-color" content="#0b1a3a">
 <link rel="icon" href="{pre}img/logo.webp" type="image/webp">
-<script>document.documentElement.classList.replace('no-js','js')</script>
+<script>(function(d){{d.classList.replace('no-js','js');if(!matchMedia('(prefers-reduced-motion: reduce)').matches){{d.classList.add('motion');setTimeout(function(){{if(!window.gsap)d.classList.remove('motion')}},3000)}}}})(document.documentElement)</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Onest:wght@400;600&display=swap">
@@ -696,7 +696,11 @@ def quote_dialog(L, here, product=None, packs=None):
   </div>
 </dialog>
 <script>window.HM_I18N={i18n};window.HM_WA="{SITE['whatsapp']}";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 <script src="{pre}assets/app.js" defer></script>
+<script src="{pre}assets/motion.js" defer></script>
 </body>
 </html>
 """
