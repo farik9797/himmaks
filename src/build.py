@@ -552,6 +552,7 @@ def urls(p):
         "delivery": {"ru": "dostavka-i-oplata/", "kz": "kz/zhetkizu-zhane-tolem/"},
         "faq": {"ru": "voprosy-i-otvety/", "kz": "kz/suraqtar-men-zhauaptar/"},
         "privacy": {"ru": "politika-konfidencialnosti/", "kz": "kz/qupiyalylyq-sayasaty/"},
+        "thanks": {"ru": "spasibo/", "kz": "kz/rahmet/"},
         "product": {"ru": f"catalog/{p['category']['ru']['slug']}/{p['slug']['ru']}/",
                     "kz": f"kz/katalog/{p['category']['kz']['slug']}/{p['slug']['kz']}/"},
     }
@@ -688,6 +689,7 @@ def quote_dialog(L, here, product=None, packs=None):
     """Форма запроса цены. product=None — общая заявка, поле товара редактируемое."""
     t = UI[L]
     urls_privacy = {"ru": "politika-konfidencialnosti/", "kz": "kz/qupiyalylyq-sayasaty/"}
+    urls_thanks = {"ru": "spasibo/", "kz": "kz/rahmet/"}
     pre = depth_prefix(here)
     if packs:
         pack_field = (f'<span class="select"><select name="pack">' + "".join(f'<option>{E(k["label"][L])}</option>' for k in packs)
@@ -717,7 +719,7 @@ def quote_dialog(L, here, product=None, packs=None):
       <a class="btn btn-primary btn-block" href="#" target="_blank" rel="noopener" data-wa-send>{icon('whatsapp')}{E(t['f_wa_btn'])}</a></div>
   </div>
 </dialog>
-<script>window.HM_I18N={i18n};window.HM_WA="{SITE['whatsapp']}";</script>
+<script>window.HM_I18N={i18n};window.HM_WA="{SITE['whatsapp']}";window.HM_THANKS="{pre}{urls_thanks[L]}";</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
@@ -1589,6 +1591,66 @@ T404 = {
 }
 
 
+T_THANKS = {
+    "ru": {"title": "Спасибо за заявку | ХИММАКС", "h1": "Спасибо, заявка у нас",
+           "lead": "Менеджер ответит в рабочее время и уточнит цену, наличие и фасовку.",
+           "next_h": "Что будет дальше",
+           "next": [["Уточнение", "Менеджер спросит, для чего продукт, какой нужен объём, регион и сроки."],
+                    ["Цена и наличие", "Подберём товар и согласуем цену, наличие и условия поставки."],
+                    ["Счёт и документы", "Пришлём счёт, спецификацию и паспорта на продукцию."]],
+           "hours_h": "Когда ответим", "urgent": "Срочный вопрос? Позвоните или напишите в WhatsApp.",
+           "wa_note": "Если вы отправляли заявку через WhatsApp, проверьте, что сообщение ушло в чат.",
+           "back": "Вернуться в каталог", "home": "На главную"},
+    "kz": {"title": "Өтініміңізге рақмет | ХИММАКС", "h1": "Рақмет, өтінім бізде",
+           "lead": "Менеджер жұмыс уақытында жауап беріп, бағасын, қолда барын және қаптамасын нақтылайды.",
+           "next_h": "Әрі қарай не болады",
+           "next": [["Нақтылау", "Менеджер өнім не үшін керегін, қажетті көлемді, өңірді және мерзімді сұрайды."],
+                    ["Баға және қолда бары", "Тауарды таңдап, бағасын, қолда барын және жеткізу шарттарын келісеміз."],
+                    ["Шот және құжаттар", "Шотты, спецификацияны және өнім паспорттарын жібереміз."]],
+           "hours_h": "Қашан жауап береміз", "urgent": "Шұғыл сұрақ бар ма? Қоңырау шалыңыз немесе WhatsApp-қа жазыңыз.",
+           "wa_note": "Өтінімді WhatsApp арқылы жіберсеңіз, хабарламаның чатқа кеткенін тексеріңіз.",
+           "back": "Каталогқа оралу", "home": "Басты бетке"},
+}
+
+
+def render_thanks(L, U):
+    """Страница после заявки: noindex, не в sitemap. Отдельный адрес для цели «отправка формы» в Метрике и GA4."""
+    t, r = UI[L], T_THANKS[L]
+    here = U["thanks"][L]
+    pre = depth_prefix(here)
+    steps = "".join(f'<li><h3>{E(h)}</h3><p>{E(x)}</p></li>' for h, x in r["next"])
+    phones = "".join(f'<li><a class="c-phone" href="tel:{ph["tel"]}">{ph["text"]}</a><span>{E(ph["note"][L])}</span></li>' for ph in SITE["phones"][:2])
+    body = f"""<main id="main">
+  <section class="product-head page-thanks">
+    {ui_img('head-contacts', pre, cls='head-bg', eager=True)}
+    <div class="container">
+      <div class="thanks-mark" aria-hidden="true">{icon('circle-check', 'icon thanks-icon')}</div>
+      <h1>{E(r['h1'])}</h1>
+      <p class="lead">{E(r['lead'])}</p>
+      <div class="actions actions-404">
+        <a class="btn btn-primary" href="{pre}{U['catalog'][L]}">{E(r['back'])}</a>
+        <a class="btn btn-ghost btn-on-dark" href="{pre}{U['home'][L]}">{E(r['home'])}</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="band-light"><section class="container block">
+    <h2>{E(r['next_h'])}</h2>
+    <ol class="steps steps-row steps-3">{steps}</ol>
+  </section></div>
+
+  <section class="container block thanks-contacts">
+    <div><h2 class="h-sm">{E(r['hours_h'])}</h2><p class="c-strong">{E(SITE['hours'][L])}</p><p class="c-note">{E(r['urgent'])}</p><p class="c-note">{E(r['wa_note'])}</p></div>
+    <ul class="c-phones">{phones}</ul>
+    <a class="btn btn-ghost" href="{wa_link(t['wa_hello'])}" target="_blank" rel="noopener">{icon('whatsapp')}{E(t['whatsapp'])}</a>
+  </section>
+</main>
+"""
+    html_ = (head(L, r["title"], r["lead"], here, U["thanks"], "img/logo.webp", noindex=True)
+             + header(L, here, U["thanks"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+    return re.sub(r'<link rel="(?:canonical|alternate)"[^>]*>\n?', "", html_)
+
+
 def render_404(U):
     """404.html в корне: GitHub Pages отдаёт её на любой несуществующий адрес, поэтому пути абсолютные от SITE_BASE.
     Разметка на русском; если адрес начинается с /kz/, скрипт подставляет казахские тексты и ссылки."""
@@ -1635,6 +1697,7 @@ def render_404(U):
     # относительные пути -> абсолютные от корня сайта
     html_ = re.sub(r'(\s(?:href|src|action|data-src|poster)=")(?!https?:|/|#|mailto:|tel:|data:)([^"]*)"',
                    lambda m: f'{m.group(1)}{SITE_BASE}{m.group(2)}"', html_)
+    html_ = html_.replace('window.HM_THANKS="', f'window.HM_THANKS="{SITE_BASE}')  # JS-строку regex не трогает
     # у 404 нет канонического адреса и языковых пар
     return re.sub(r'<link rel="(?:canonical|alternate)"[^>]*>\n?', "", html_)
 
@@ -1671,6 +1734,11 @@ def main():
         pages.append(g["urls"])
     print("→ товаров:", sum(1 for g in goods if not g["page"]), "x 2 языка")
 
+    for L in ("ru", "kz"):
+        out = OUT / U["thanks"][L] / "index.html"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(render_thanks(L, U))
+    print("→ спасибо: ", U["thanks"]["ru"], U["thanks"]["kz"])
     (OUT / "404.html").write_text(render_404(U))
     print("→ site/404.html")
 
