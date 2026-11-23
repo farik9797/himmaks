@@ -38,7 +38,7 @@ UI_IMG = {
     "banner-opt": (627, 418), "banner-new": (454, 303),
     "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375), "head-delivery": (427, 394),
 }
-PRIVACY_URL = None  # политика конфиденциальности: ссылка в подвале появится, когда клиент даст текст политики
+PRIVACY_URL = True  # политика конфиденциальности: src/privacy.json (проект, проверить юристу)
 HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
 
 
@@ -133,6 +133,7 @@ UI = {
         "f_region": "Регион доставки", "f_region_ph": "Например, Павлодар или Астана",
         "f_comment": "Комментарий", "f_comment_ph": "Нужный объём, сроки, вопросы",
         "f_submit": "Отправить заявку", "f_consent": "Нажимая кнопку, вы соглашаетесь на обработку персональных данных.",
+        "f_consent_link": "Политика конфиденциальности",
         "f_phone_err": "Укажите телефон, чтобы менеджер мог перезвонить", "f_name_err": "Укажите, как к вам обращаться",
         "f_ok_h": "Заявка принята", "f_ok_p": "Менеджер перезвонит в рабочее время и уточнит цену и наличие.",
         "f_wa_h": "Заявка готова", "f_wa_p": "Отправьте её менеджеру в WhatsApp, он ответит в рабочее время.",
@@ -223,6 +224,7 @@ UI = {
         "f_region": "Жеткізу өңірі", "f_region_ph": "Мысалы, Павлодар немесе Астана",
         "f_comment": "Түсініктеме", "f_comment_ph": "Қажетті көлем, мерзім, сұрақтар",
         "f_submit": "Өтінім жіберу", "f_consent": "Батырманы басу арқылы дербес деректерді өңдеуге келісім бересіз.",
+        "f_consent_link": "Құпиялылық саясаты",
         "f_phone_err": "Менеджер хабарласуы үшін телефонды көрсетіңіз", "f_name_err": "Сізге қалай жүгінуге болатынын көрсетіңіз",
         "f_ok_h": "Өтінім қабылданды", "f_ok_p": "Менеджер жұмыс уақытында хабарласып, бағасы мен қолда барын нақтылайды.",
         "f_wa_h": "Өтінім дайын", "f_wa_p": "Оны WhatsApp арқылы менеджерге жіберіңіз, ол жұмыс уақытында жауап береді.",
@@ -548,6 +550,7 @@ def urls(p):
         "docs": {"ru": "dokumentaciya/", "kz": "kz/qujattama/"},
         "delivery": {"ru": "dostavka-i-oplata/", "kz": "kz/zhetkizu-zhane-tolem/"},
         "faq": {"ru": "voprosy-i-otvety/", "kz": "kz/suraqtar-men-zhauaptar/"},
+        "privacy": {"ru": "politika-konfidencialnosti/", "kz": "kz/qupiyalylyq-sayasaty/"},
         "product": {"ru": f"catalog/{p['category']['ru']['slug']}/{p['slug']['ru']}/",
                     "kz": f"kz/katalog/{p['category']['kz']['slug']}/{p['slug']['kz']}/"},
     }
@@ -675,7 +678,7 @@ def footer(L, here, U):
       <li class="foot-addr">{icon('map-pin')}<span>{E(SITE['address'][L])}</span></li>
       <li class="foot-addr">{icon('clock')}<span>{E(SITE['hours'][L])}</span></li></ul></div>
   </div>
-  <div class="container foot-bottom"><p>© 2026 {E(t['rights'])}</p>{f'<a href="{pre}{PRIVACY_URL}">{E(t["privacy"])}</a>' if PRIVACY_URL else ''}</div>
+  <div class="container foot-bottom"><p>© 2026 {E(t['rights'])}</p>{f'<a href="{pre}{U["privacy"][L]}">{E(t["privacy"])}</a>' if PRIVACY_URL else ''}</div>
 </footer>
 """
 
@@ -683,6 +686,7 @@ def footer(L, here, U):
 def quote_dialog(L, here, product=None, packs=None):
     """Форма запроса цены. product=None — общая заявка, поле товара редактируемое."""
     t = UI[L]
+    urls_privacy = {"ru": "politika-konfidencialnosti/", "kz": "kz/qupiyalylyq-sayasaty/"}
     pre = depth_prefix(here)
     if packs:
         pack_field = (f'<span class="select"><select name="pack">' + "".join(f'<option>{E(k["label"][L])}</option>' for k in packs)
@@ -705,7 +709,7 @@ def quote_dialog(L, here, product=None, packs=None):
       <label class="field"><span>{E(t['f_region'])}</span><input name="region" autocomplete="address-level1" placeholder="{E(t['f_region_ph'])}"></label>
       <label class="field"><span>{E(t['f_comment'])}</span><textarea name="comment" rows="3" placeholder="{E(t['f_comment_ph'])}"></textarea></label>
       <button class="btn btn-primary btn-block" type="submit">{E(t['f_submit'])}</button>
-      <p class="consent">{E(t['f_consent'])}</p>
+      <p class="consent">{E(t['f_consent'])} <a href="{pre}{urls_privacy[L]}" target="_blank" rel="noopener">{E(t['f_consent_link'])}</a></p>
     </form>
     <div class="quote-done" hidden data-done="ok"><h2>{E(t['f_ok_h'])}</h2><p>{E(t['f_ok_p'])}</p></div>
     <div class="quote-done" hidden data-done="wa"><h2>{E(t['f_wa_h'])}</h2><p>{E(t['f_wa_p'])}</p>
@@ -1550,6 +1554,28 @@ def render_faq(L, U):
             + header(L, here, U["faq"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
+def render_privacy(L, U):
+    t = UI[L]
+    d = json.loads((SRC / "privacy.json").read_text())
+    c = d[L]
+    here = U["privacy"][L]
+    pre = depth_prefix(here)
+    draft = f'<p class="doc-sample desc-note">{E(c["draft"])}</p>' if PREVIEW else ""
+    secs = "".join(f'<section class="policy-sec"><h2>{i}. {E(h)}</h2>' + "".join(f"<p>{E(x)}</p>" for x in ps) + "</section>"
+                   for i, (h, ps) in enumerate(c["sections"], 1))
+    body = f"""<main id="main">
+  {page_head(L, pre, U, 'privacy', 'docs', c['h1'], c['lead'])}
+  <section class="container block policy">
+    {draft}
+    <p class="policy-date">{E(c['updated_label'])}: {E(d['updated'][L])}</p>
+    <div class="prose">{secs}</div>
+  </section>
+</main>
+"""
+    return (head(L, c["title"], c["desc"], here, U["privacy"], "img/ui/docs.webp", [crumbs_ld(L, U, "privacy", c["h1"])])
+            + header(L, here, U["privacy"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+
+
 def main():
     p = json.loads((SRC / "product.json").read_text())
     U = urls(p)
@@ -1562,7 +1588,8 @@ def main():
         for kind, html_ in (("home", render_home(L, p, goods, U)), ("catalog", render_catalog(L, p, goods, U)),
                             ("product", render_product(L, p, U, goods)), ("about", render_about(L, goods, U)),
                             ("contacts", render_contacts(L, U)), ("docs", render_docs(L, U)),
-                            ("delivery", render_delivery(L, U)), ("faq", render_faq(L, U))):
+                            ("delivery", render_delivery(L, U)), ("faq", render_faq(L, U)),
+                            ("privacy", render_privacy(L, U))):
             out = OUT / U[kind][L] / "index.html"
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(html_)
