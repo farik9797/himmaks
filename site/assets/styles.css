@@ -589,3 +589,16 @@ html.lenis, html.lenis body { height: auto; }
 @media (prefers-reduced-motion: reduce) {
   .card:hover, .cat-card:hover, .info-card:hover, .card:active, .cat-card:active { transform: none; }
 }
+
+/* ---------- карточка товара целиком кликабельна (ui-ux-pro-max: cursor-pointer, hover без сдвига раскладки) ---------- */
+.card { position: relative; }
+.card-title a::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.card-title a:focus-visible { outline: none; }
+.card:has(.card-title a:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+.card-actions { position: relative; z-index: 2; }
+.card:has(.card-title a):hover .card-title a { color: var(--blue-600); }
+@media (min-width: 900px) { .gallery-img.gallery-sq { aspect-ratio: 1 / 1; } }
+.desc-note { margin-bottom: 16px; }
+.prose ul { list-style: disc; padding-left: 20px; margin-top: 12px; display: grid; gap: 8px; }
+.prose ul + p { margin-top: 12px; }
+.prose li::marker { color: var(--blue-600); }

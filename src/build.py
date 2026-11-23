@@ -151,6 +151,12 @@ UI = {
         "docs_all": "Все документы", "doc_open": "Открыть", "doc_download": "Скачать",
         "doc_request": "Запросить", "doc_sample": "Образец: файл предоставит заказчик",
         "doc_wa": "Здравствуйте! Пришлите, пожалуйста, документ «{doc}» на товар «{product}».",
+        "h_related": "Похожие товары", "related_all": "Вся группа",
+        "desc_draft": "Текст с текущего сайта на Satu, требует редакторской проверки",
+        "lead_auto": "{cat}. Склад в Павлодаре, доставка по Казахстану. Цену и наличие уточнит менеджер.",
+        "seo_title": "{name}: купить в Павлодаре | ХИММАКС",
+        "seo_desc": "{name}{pack}. Склад в Павлодаре, доставка по Казахстану. Цену и наличие уточнит менеджер.",
+        "seo_pack": ", фасовка: {packs}",
     },
     "kz": {
         "lang": "kk", "og_locale": "kk_KZ",
@@ -234,6 +240,12 @@ UI = {
         "docs_all": "Барлық құжаттар", "doc_open": "Ашу", "doc_download": "Жүктеу",
         "doc_request": "Сұрау", "doc_sample": "Үлгі: файлды тапсырыс беруші ұсынады",
         "doc_wa": "Сәлеметсіз бе! «{product}» тауарына «{doc}» құжатын жіберіңізші.",
+        "h_related": "Ұқсас тауарлар", "related_all": "Бүкіл топ",
+        "desc_draft": "Мәтін Satu-дағы қазіргі сайттан алынған, редакторлық тексеруді қажет етеді",
+        "lead_auto": "{cat}. Қойма Павлодарда, Қазақстан бойынша жеткізу. Бағасы мен қолда барын менеджер нақтылайды.",
+        "seo_title": "{name}: Павлодарда сатып алу | ХИММАКС",
+        "seo_desc": "{name}{pack}. Қойма Павлодарда, Қазақстан бойынша жеткізу. Бағасы мен қолда барын менеджер нақтылайды.",
+        "seo_pack": ", қаптама: {packs}",
     },
 }
 
@@ -541,6 +553,10 @@ def urls(p):
 
 
 def picture(img, L, pre, sizes, cls, eager):
+    load = 'fetchpriority="high"' if eager else 'loading="lazy"'
+    if img.get("file"):  # одно фото с Satu, 480x480 webp
+        return (f'<img class="{cls}" src="{pre}img/{img["file"]}" width="{img["w"]}" height="{img["h"]}" '
+                f'alt="{E(img["alt"][L])}" {load} decoding="async">')
     base, ws = img["base"], img["widths"]
     srcset = lambda ext: ", ".join(f"{pre}img/{base}-{w}.{ext} {w}w" for w in ws)
     load = 'fetchpriority="high"' if eager else 'loading="lazy"'
@@ -748,6 +764,97 @@ def pack_text(packs, L):
     return txt
 
 
+KZ_CAT = {"promyshlennaya-himiya": "onerkasiptik-himiya", "dezsredstva": "dezinfekciyalyq-quraldar",
+          "ochistka-vody": "sudy-tazartu", "pishchevye-dobavki": "tagamdyq-qospalar", "kormovye-dobavki": "zhemdik-qospalar",
+          "dobavki-k-betonu": "betonga-qospalar", "kanistry": "plastik-kanistrler", "rastvoriteli": "eritkishter"}
+USE_ICON = {"voda": "waves", "pishch": "wheat", "agro": "sprout", "stroy": "brick-wall", "dez": "spray-can", "prom": "factory"}
+PROP_KZ = {"Страна производитель": "Өндіруші ел", "Вес": "Салмағы", "Объем": "Көлемі", "Фасовка": "Қаптама",
+           "Тип": "Түрі", "Вид": "Түрі", "Производитель": "Өндіруші", "Назначение": "Мақсаты", "Форма выпуска": "Шығарылу түрі",
+           "Концентрация": "Концентрациясы", "Упаковка": "Қаптамасы", "Форма": "Пішіні", "Сорт": "Сорты", "Материал": "Материалы",
+           "Цвет": "Түсі", "Размер": "Өлшемі", "Применение": "Қолданылуы", "Основной дезинфицирующий агент": "Негізгі дезинфекциялық агент"}
+PROP_KEYS = set(PROP_KZ) | {"Хранение", "Состояние", "Штабелируемые", "Мешок", "Пользовательские характеристики"}
+TRANSLIT = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
+                    ["a", "b", "v", "g", "d", "e", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u",
+                     "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "ya"]))
+
+
+def slugify(name):
+    out = "".join(TRANSLIT.get(ch, ch) for ch in name.lower())
+    out = re.sub(r"[^a-z0-9]+", "-", out).strip("-")
+    return out[:70].rsplit("-", 1)[0] if len(out) > 70 else out
+
+
+def satu_description(info, name):
+    """Связные абзацы и пункты списка из описания Satu: без обрывков таблиц, формул и посторонних списков."""
+    out, size = [], 0
+    for line in info.get("desc", "").split("\n"):
+        line = re.sub(r"\s+", " ", line).strip().replace(" — ", " - ").replace("—", "-").replace("–", "-")
+        if not line or line.lower() == name.lower():
+            continue
+        line = re.sub(r"[\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F]", "", line).strip()  # эмодзи из текстов Satu
+        bullet = line[:1] in "*•-·"
+        text = line.lstrip("*•-· ").strip()
+        if len(re.findall(r"\b[A-ZА-ЯЁ]{3,}\b", text)) >= 3:  # обрывки таблиц и аббревиатуры подряд
+            continue
+        # абзац: законченное предложение от 5 слов; пункт списка: от 5 слов
+        if len(text.split()) < 5 or (not bullet and not re.search(r"[.!?:;]$", text)):
+            continue
+        out.append(("li" if bullet else "p", text))
+        size += len(text)
+        if size > 1100 or len(out) >= 6:
+            break
+    return out
+
+
+def satu_product(g, info, packs, U):
+    """Товар Satu в структуре product.json (общий шаблон страницы)."""
+    cat = g["cats"][0]
+    props = [(k, v) for k, v in info.get("props", {}).items() if k not in PROP_KEYS - set(PROP_KZ) and v not in PROP_KEYS]
+    specs = [{"key": i < 4, "label": {"ru": k, "kz": PROP_KZ.get(k, k)}, "value": {"ru": v, "kz": v}} for i, (k, v) in enumerate(props)]
+    desc = satu_description(info, g["name"])
+    pk_ru = ", ".join(g["packs"])
+    return {
+        "id": g["id"], "_urls": g["urls"],
+        "availability": {"show": True, "in_stock": g["stock"]},
+        "category": {"ru": {"name": CAT[cat]["ru"], "slug": cat}, "kz": {"name": CAT[cat]["kz"], "slug": KZ_CAT[cat]}},
+        "name": {"ru": g["name"], "kz": g["name"]},
+        "short": {L: UI[L]["lead_auto"].format(cat=CAT[cat][L]) for L in ("ru", "kz")},
+        "seo": {L: {"title": UI[L]["seo_title"].format(name=g["name"]),
+                    "description": UI[L]["seo_desc"].format(name=g["name"], pack=UI[L]["seo_pack"].format(packs=pack_text(g["packs"], L)) if g["packs"] else "")}
+                for L in ("ru", "kz")},
+        "images": [{"file": f"p/{g['id']}.webp", "w": 480, "h": 480, "alt": {"ru": g["name"], "kz": g["name"]}}],
+        "specs": specs,
+        "packs": [{"label": {"ru": x, "kz": pack_text([x], "kz")}} for x in g["packs"]],
+        "description": {"ru": desc, "kz": desc},
+        "desc_lang": {"kz": "ru"}, "desc_draft": True,
+        "applications": [{"icon": USE_ICON[k], "title": lbl, "text": {"ru": "", "kz": ""}} for k, lbl, _ in USES if k in g["uses"]],
+        "documents": [{"placeholder": False, "file": None, "format": None, "size": None, "type": d, "title": d} for d in (
+            {"ru": "Паспорт качества", "kz": "Сапа паспорты"}, {"ru": "Паспорт безопасности (SDS)", "kz": "Қауіпсіздік паспорты (SDS)"},
+            {"ru": "Сертификат или декларация", "kz": "Сертификат немесе декларация"})],
+        "storage": [x for x in [
+            {"label": {"ru": "Фасовка", "kz": "Қаптама"}, "value": {"ru": pk_ru, "kz": pack_text(g["packs"], "kz")}} if g["packs"] else None,
+            {"label": {"ru": "Самовывоз", "kz": "Өзі алып кету"}, "value": {"ru": "Склад в Павлодаре, ул. Циолковского, 144/4", "kz": "Павлодардағы қойма, Циолковский к-сі, 144/4"}},
+            {"label": {"ru": "Доставка", "kz": "Жеткізу"}, "value": {"ru": "По всему Казахстану, сроки и стоимость считает менеджер", "kz": "Бүкіл Қазақстан бойынша, мерзімі мен құнын менеджер есептейді"}},
+        ] if x],
+    }
+
+
+def display_name(name):
+    """Названия Satu без капса: латинский бренд с заглавной (COSMEDICAL -> Cosmedical), русские слова строчными.
+    Аббревиатуры до 4 букв и марки с цифрами или дефисом (ДП-2Т, ФМ, ПМП, ГОСТ) не трогаем."""
+    words = re.split(r"(\s+)", name.strip())
+    out, first = [], True
+    for w in words:
+        core = re.sub(r"[^A-Za-zА-Яа-яЁё]", "", w)
+        if len(core) >= 5 and core.isupper() and not re.search(r"[\d-]", w):
+            new = core.capitalize() if re.match(r"[A-Za-z]", core) or first else core.lower()
+            w = w.replace(core, new)
+        if w.strip():
+            first = False
+        out.append(w)
+    return re.sub(r"\s+,", ",", "".join(out))
+
+
 def load_goods(p):
     """Товары с Satu + замены: два листинга гипохлорита натрия сведены в одну карточку с готовой страницей."""
     raw = json.loads((SRC / "catalog-satu.json").read_text())
@@ -755,7 +862,7 @@ def load_goods(p):
     details = json.loads((SRC / "satu-details.json").read_text())
     goods, gipo = [], None
     for g in raw:
-        item = {"id": g["id"], "cats": [g["cat"]], "name": g["name"], "img": f"img/p/{g['id']}.webp",
+        item = {"id": g["id"], "cats": [g["cat"]], "name": display_name(g["name"]), "img": f"img/p/{g['id']}.webp",
                 "stock": g["presence"] == "В наличии", "page": None}
         # Кормовые добавки (раздел из брифа): кормовые позиции Satu переносим из «Пищевых добавок»,
         # соль «для промышленного потребления и кормовых целей» оставляем и в промышленной химии
@@ -772,7 +879,7 @@ def load_goods(p):
             if gipo is None:
                 gipo = item
                 item.update(id="gipohlorit-natriya", name=p["name"]["ru"], name_kz=p["name"]["kz"],
-                            img="img/gipohlorit-natriya-480.webp", page=True)
+                            img="img/gipohlorit-natriya-480.webp", page=True, urls=urls(p)["product"])
                 # фасовка с этикетки (product.json) + фасовки из листинга Satu
                 item["packs"] = [k["label"]["ru"].lower() for k in p["packs"]] + item["packs"]
                 goods.append(item)
@@ -783,6 +890,15 @@ def load_goods(p):
             continue
         goods.append(item)
     order = [k for k, _, _ in USES]
+    taken = set()
+    for g in goods:
+        if g["page"]:
+            continue
+        cat, slug = g["cats"][0], slugify(g["name"])
+        if (cat, slug) in taken:
+            slug = f"{slug}-{g['id'][-4:]}"
+        taken.add((cat, slug))
+        g["urls"] = {"ru": f"catalog/{cat}/{slug}/", "kz": f"kz/katalog/{KZ_CAT[cat]}/{slug}/"}
     for g in goods:
         g["uses"] = sorted(set(g["uses"]), key=order.index)
         g["pk"] = sorted(set().union(*[pack_classes(x) for x in g["packs"]]) if g["packs"] else set())
@@ -792,9 +908,10 @@ def load_goods(p):
 def goods_card(g, L, pre, U, tag="li"):
     t = UI[L]
     name = g.get("name_kz") if L == "kz" and g.get("name_kz") else g["name"]
-    href = pre + U["product"][L] if g["page"] else None
+    href = pre + g["urls"][L] if g.get("urls") else None
     cat_name = CAT[g["cats"][0]][L]
-    title = f'<a href="{href}">{E(name)}</a>' if href else E(name)
+    tail = "»" if href and name.endswith("»") else ""
+    title = f'<a href="{href}">{E(name[:-1] if tail else name)}</a>{tail}' if href else E(name)
     media = (f'<img src="{pre}{g["img"]}" width="480" height="480" alt="{E(name)}" loading="lazy" decoding="async">')
     media = f'<a class="card-media" href="{href}" tabindex="-1" aria-hidden="true">{media}</a>' if href else f'<div class="card-media">{media}</div>'
     stock = (f'<p class="status">{icon("circle-check")}{E(t["in_stock"])}</p>' if g["stock"]
@@ -1051,13 +1168,18 @@ def render_catalog(L, p, goods, U):
             + header(L, here, U["catalog"], 0, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
-def render_product(L, p, U):
+def img_url(i):
+    return f"img/{i['file']}" if i.get("file") else f"img/{i['base']}-{i['widths'][-1]}.webp"
+
+
+def render_product(L, p, U, goods=()):
     t = UI[L]
-    here = U["product"][L]
+    PU = p["_urls"]
+    here = PU[L]
     pre = depth_prefix(here)
     name, short = p["name"][L], p["short"][L]
     url = f"{DOMAIN}/{here}"
-    cat_slug = "ochistka-vody"
+    cat_slug = p["category"]["ru"]["slug"]
     cat = p["category"][L]["name"]
     ids = t["ids"]
     wa_main = wa_link(t["wa_text"].format(product=name))
@@ -1074,11 +1196,15 @@ def render_product(L, p, U):
         {"@type": "ListItem", "position": i + 1, "name": n, "item": u} for i, (n, u) in enumerate(crumbs)]}
     ld_product = {"@context": "https://schema.org", "@type": "Product", "name": name, "description": short,
                   "category": cat, "url": url,
-                  "image": [f"{DOMAIN}/img/{i['base']}-{i['widths'][-1]}.webp" for i in p["images"]],
+                  "image": [f"{DOMAIN}/{img_url(i)}" for i in p["images"]],
                   "additionalProperty": [{"@type": "PropertyValue", "name": s["label"][L], "value": s["value"][L]} for s in all_specs]}
 
     imgs = p["images"]
-    if imgs:
+    if imgs and imgs[0].get("file"):
+        gallery = (f'<button class="gallery-main" type="button" data-zoom aria-label="{E(t["zoom"])}">'
+                   f'{picture(imgs[0], L, pre, "", "gallery-img gallery-sq", True)}'
+                   f'<span class="zoom-hint">{icon("search-check")}</span></button>')
+    elif imgs:
         gallery = (f'<button class="gallery-main" type="button" data-zoom aria-label="{E(t["zoom"])}">'
                    f'{picture(imgs[0], L, pre, "(min-width: 1024px) 560px, 100vw", "gallery-img", True)}'
                    f'<span class="zoom-hint">{icon("search-check")}</span></button>')
@@ -1101,8 +1227,18 @@ def render_product(L, p, U):
         packs = (f'<fieldset class="packs"><legend>{E(t["packs"])}</legend><div class="pack-list">' + "".join(
             f'<label class="pack"><input type="radio" name="pack" value="{E(k["label"][L])}"{" checked" if i == 0 else ""}><span>{E(k["label"][L])}</span></label>'
             for i, k in enumerate(p["packs"])) + "</div></fieldset>")
-    desc = "".join(f"<{tag}>{E(txt)}</{tag}>" for tag, txt in p["description"][L])
-    apps_html = "".join(f'<li class="app">{icon(a["icon"], "icon app-icon")}<h3>{E(a["title"][L])}</h3><p>{E(a["text"][L])}</p></li>' for a in apps)
+    desc, in_list = "", False
+    for tag, txt in p["description"][L]:
+        if tag == "li" and not in_list:
+            desc, in_list = desc + "<ul>", True
+        if tag != "li" and in_list:
+            desc, in_list = desc + "</ul>", False
+        desc += f"<{tag}>{E(txt)}</{tag}>"
+    desc += "</ul>" if in_list else ""
+    desc_lang = f' lang="{p["desc_lang"][L]}"' if p.get("desc_lang", {}).get(L) else ""
+    desc_note = f'<p class="doc-sample desc-note">{E(t["desc_draft"])}</p>' if PREVIEW and p.get("desc_draft") else ""
+    apps_html = "".join(f'<li class="app">{icon(a["icon"], "icon app-icon")}<h3>{E(a["title"][L])}</h3>'
+                        f'{"<p>" + E(a["text"][L]) + "</p>" if a["text"][L] else ""}</li>' for a in apps)
 
     def doc_row(d):
         meta = ", ".join(x for x in [d["format"], d["size"]] if x)
@@ -1117,9 +1253,16 @@ def render_product(L, p, U):
                 f'<div class="doc-text"><p class="doc-title">{E(title)}</p><p class="doc-meta">{E(d["type"][L])}{(", " + E(meta)) if meta else ""}</p>{sample}</div>'
                 f'<div class="doc-actions">{act}</div></li>')
 
-    sections = [(ids[0], t["tabs"][0], True), (ids[1], t["tabs"][1], bool(apps)), (ids[2], t["tabs"][2], bool(all_specs)),
+    has_desc = bool(p["description"][L])
+    sections = [(ids[0], t["tabs"][0], has_desc), (ids[1], t["tabs"][1], bool(apps)), (ids[2], t["tabs"][2], bool(all_specs)),
                 (ids[3], t["tabs"][3], bool(storage)), (ids[4], t["tabs"][4], bool(docs))]
     tabs = "".join(f'<li><a href="#{i}">{E(n)}</a></li>' for i, n, on in sections if on)
+    # Похожие товары: та же группа, сначала в наличии
+    same = [g for g in goods if cat_slug in g["cats"] and g["id"] != p["id"]]
+    same = sorted(same, key=lambda g: not g["stock"])[:8]
+    related = (f'<section class="container block" aria-labelledby="related-h"><div class="block-head"><h2 id="related-h">{E(t["h_related"])}</h2>'
+               f'<a class="text-link" href="{cat_url}?cat={cat_slug}">{E(t["related_all"])}</a></div>'
+               f'<ul class="rail" tabindex="0">{"".join(goods_card(g, L, pre, U) for g in same)}</ul></section>') if same else ""
 
     body = f"""<main id="main">
   <section class="product-head">
@@ -1154,7 +1297,7 @@ def render_product(L, p, U):
   <nav class="section-nav" aria-label="{E(name)}"><div class="container"><ul>{tabs}</ul></div></nav>
 
   <div class="container content-grid">
-    <section id="{ids[0]}" class="block block-desc"><h2>{E(t['h_desc'])}</h2><div class="prose">{desc}</div></section>
+    {f'<section id="{ids[0]}" class="block block-desc"><h2>{E(t["h_desc"])}</h2>{desc_note}<div class="prose"{desc_lang}>{desc}</div></section>' if has_desc else ''}
     {f'<section id="{ids[1]}" class="block block-apps"><h2>{E(t["h_papps"])}</h2><ul class="apps">{apps_html}</ul></section>' if apps else ''}
   </div>
 
@@ -1168,6 +1311,8 @@ def render_product(L, p, U):
     <ul class="docs">{"".join(doc_row(d) for d in docs)}</ul>
   </section>''' if docs else ''}
 
+  {related}
+
   {why_block(L)}
   {cta_band(L, pre, t['wa_text'].format(product=name))}
 </main>
@@ -1176,9 +1321,9 @@ def render_product(L, p, U):
   <button class="modal-close" type="button" data-close aria-label="{E(t['close'])}">{icon('x')}</button>
 </dialog>
 """
-    return (head(L, p["seo"][L]["title"], p["seo"][L]["description"], here, U["product"],
-                 f"img/{imgs[0]['base']}-{imgs[0]['widths'][-1]}.webp", [ld_bc, ld_product], og_type="product")
-            + header(L, here, U["product"], 0, U) + body + footer(L, here, U) + quote_dialog(L, here, name, p["packs"]))
+    og = img_url(imgs[0]) if imgs else "img/logo.webp"
+    return (head(L, p["seo"][L]["title"], p["seo"][L]["description"], here, PU, og, [ld_bc, ld_product], og_type="product")
+            + header(L, here, PU, 0, U) + body + footer(L, here, U) + quote_dialog(L, here, name, p["packs"]))
 
 
 def render_about(L, goods, U):
@@ -1401,16 +1546,44 @@ def render_faq(L, U):
 def main():
     p = json.loads((SRC / "product.json").read_text())
     U = urls(p)
+    p["_urls"] = U["product"]
     goods = load_goods(p)
+    details = json.loads((SRC / "satu-details.json").read_text())
+    packs = json.loads((SRC / "catalog-packs.json").read_text())["packs"]
+    pages = []
     for L in ("ru", "kz"):
         for kind, html_ in (("home", render_home(L, p, goods, U)), ("catalog", render_catalog(L, p, goods, U)),
-                            ("product", render_product(L, p, U)), ("about", render_about(L, goods, U)),
+                            ("product", render_product(L, p, U, goods)), ("about", render_about(L, goods, U)),
                             ("contacts", render_contacts(L, U)), ("docs", render_docs(L, U)),
                             ("delivery", render_delivery(L, U)), ("faq", render_faq(L, U))):
             out = OUT / U[kind][L] / "index.html"
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(html_)
             print("→", out.relative_to(ROOT))
+            pages.append(U[kind])
+
+    # Страницы остальных товаров: по тому же шаблону, данные с Satu
+    for g in goods:
+        if g["page"]:
+            continue
+        prod = satu_product(g, details.get(g["id"], {}), packs, U)
+        for L in ("ru", "kz"):
+            out = OUT / g["urls"][L] / "index.html"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(render_product(L, prod, U, goods))
+        pages.append(g["urls"])
+    print("→ товаров:", sum(1 for g in goods if not g["page"]), "x 2 языка")
+
+    # sitemap.xml с парами RU/KZ (hreflang)
+    rows = []
+    for alt in {(a["ru"], a["kz"]): a for a in pages}.values():
+        for L in ("ru", "kz"):
+            rows.append(f'<url><loc>{DOMAIN}/{alt[L]}</loc>'
+                        f'<xhtml:link rel="alternate" hreflang="ru" href="{DOMAIN}/{alt["ru"]}"/>'
+                        f'<xhtml:link rel="alternate" hreflang="kk" href="{DOMAIN}/{alt["kz"]}"/></url>')
+    (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+                                     'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(rows) + "\n</urlset>\n")
+    print("→ sitemap.xml:", len(rows), "адресов")
 
 
 if __name__ == "__main__":
