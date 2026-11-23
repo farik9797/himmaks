@@ -16,6 +16,12 @@
       prevent: node => Boolean(node.closest && node.closest('dialog')),
     });
     lenis.on('scroll', ScrollTrigger.update);
+    let idle;
+    lenis.on('scroll', () => {
+      root.classList.add('is-scrolling');
+      clearTimeout(idle);
+      idle = setTimeout(() => root.classList.remove('is-scrolling'), 150);
+    });
     gsap.ticker.add(time => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
 
