@@ -575,7 +575,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* ---------- motion: Lenis, первый экран, отклик ---------- */
 html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
+/* Lenis сам ведёт прокрутку: CSS-сглаживание браузера выключаем, иначе двойное сглаживание и дрожание */
+html.lenis { scroll-behavior: auto !important; }
+/* Во время прокрутки карточки не ловят hover: без подъёма-опускания под курсором */
+.is-scrolling .card, .is-scrolling .cat-card, .is-scrolling .info-card, .is-scrolling .app-link { pointer-events: none; }
 .lenis.lenis-stopped { overflow: hidden; }
 /* Первый экран прячется до старта GSAP только при включённом движении; без GSAP класс снимается через 3 с */
 .motion .hero-text h1, .motion .hero-text .lead, .motion .hero-actions, .motion .hero-facts li,

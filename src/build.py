@@ -152,7 +152,7 @@ UI = {
         "doc_request": "Запросить", "doc_sample": "Образец: файл предоставит заказчик",
         "doc_wa": "Здравствуйте! Пришлите, пожалуйста, документ «{doc}» на товар «{product}».",
         "h_related": "Похожие товары", "related_all": "Вся группа",
-        "desc_draft": "Текст с текущего сайта на Satu, требует редакторской проверки",
+        "desc_draft": "Текст по материалам текущего сайта на Satu, ждёт проверки клиента",
         "lead_auto": "{cat}. Склад в Павлодаре, доставка по Казахстану. Цену и наличие уточнит менеджер.",
         "seo_title": "{name}: купить в Павлодаре | ХИММАКС",
         "seo_desc": "{name}{pack}. Склад в Павлодаре, доставка по Казахстану. Цену и наличие уточнит менеджер.",
@@ -241,7 +241,7 @@ UI = {
         "doc_request": "Сұрау", "doc_sample": "Үлгі: файлды тапсырыс беруші ұсынады",
         "doc_wa": "Сәлеметсіз бе! «{product}» тауарына «{doc}» құжатын жіберіңізші.",
         "h_related": "Ұқсас тауарлар", "related_all": "Бүкіл топ",
-        "desc_draft": "Мәтін Satu-дағы қазіргі сайттан алынған, редакторлық тексеруді қажет етеді",
+        "desc_draft": "Мәтін Satu-дағы қазіргі сайт материалдары бойынша дайындалды, клиенттің тексеруін күтуде",
         "lead_auto": "{cat}. Қойма Павлодарда, Қазақстан бойынша жеткізу. Бағасы мен қолда барын менеджер нақтылайды.",
         "seo_title": "{name}: Павлодарда сатып алу | ХИММАКС",
         "seo_desc": "{name}{pack}. Қойма Павлодарда, Қазақстан бойынша жеткізу. Бағасы мен қолда барын менеджер нақтылайды.",
@@ -764,6 +764,9 @@ def pack_text(packs, L):
     return txt
 
 
+_rw = SRC / "descriptions.json"
+REWRITES = {x["id"]: x for x in json.loads(_rw.read_text())["items"]} if _rw.exists() else {}
+
 KZ_CAT = {"promyshlennaya-himiya": "onerkasiptik-himiya", "dezsredstva": "dezinfekciyalyq-quraldar",
           "ochistka-vody": "sudy-tazartu", "pishchevye-dobavki": "tagamdyq-qospalar", "kormovye-dobavki": "zhemdik-qospalar",
           "dobavki-k-betonu": "betonga-qospalar", "kanistry": "plastik-kanistrler", "rastvoriteli": "eritkishter"}
@@ -811,7 +814,8 @@ def satu_product(g, info, packs, U):
     cat = g["cats"][0]
     props = [(k, v) for k, v in info.get("props", {}).items() if k not in PROP_KEYS - set(PROP_KZ) and v not in PROP_KEYS]
     specs = [{"key": i < 4, "label": {"ru": k, "kz": PROP_KZ.get(k, k)}, "value": {"ru": v, "kz": v}} for i, (k, v) in enumerate(props)]
-    desc = satu_description(info, g["name"])
+    # Рерайт по zhivoy-tekst (src/descriptions.json); нет рерайта: связные абзацы из описания Satu
+    desc = [tuple(b) for b in REWRITES.get(g["id"], {}).get("blocks", [])] or satu_description(info, g["name"])
     pk_ru = ", ".join(g["packs"])
     return {
         "id": g["id"], "_urls": g["urls"],
