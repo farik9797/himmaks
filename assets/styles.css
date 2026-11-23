@@ -339,8 +339,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 /* ---------- shared: cards ---------- */
 .card { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); overflow: hidden; transition: border-color .15s ease, box-shadow .15s ease; }
 .card:hover { border-color: var(--blue-600); box-shadow: var(--shadow); }
-.card-media { display: block; background: var(--sky-50); }
-.card-media img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; }
+.card-media { display: block; background: var(--paper); border-bottom: 1px solid var(--line); }
+.card-media img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; }
 .card-body { display: flex; flex-direction: column; gap: 8px; flex: 1; padding: 16px; }
 .card-cat { font-size: 13px; color: var(--ink-2); }
 .card-title { font: 600 16px/1.35 var(--font-body); }
