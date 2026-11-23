@@ -6,7 +6,7 @@
 SITE / UI / CATS ниже (настройки компании, строки интерфейса, группы каталога).
 PREVIEW = True показывает документы-заглушки с пометкой «образец» (на проде — False).
 """
-import json, re, html
+import json, re, html, datetime
 from pathlib import Path
 from urllib.parse import quote
 
@@ -35,6 +35,7 @@ UI_IMG = {
     "cat-promyshlennaya-himiya": (747, 249), "cat-dezsredstva": (568, 379), "cat-ochistka-vody": (540, 360),
     "cat-pishchevye-dobavki": (540, 360), "cat-dobavki-k-betonu": (454, 303), "cat-kanistry": (486, 324),
     "cat-rastvoriteli": (561, 373), "cat-kormovye-dobavki": (540, 360),
+    "banner-opt": (627, 418), "banner-new": (454, 303),
     "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375), "head-delivery": (427, 394),
 }
 HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
@@ -454,6 +455,8 @@ UI["ru"].update({
     "faq_h": "Вопросы и ответы",
     "faq_lead": "Как заказать, оплатить и получить продукцию ХИММАКС.",
     "faq_home_h": "Частые вопросы", "faq_all": "Все вопросы", "nav_faq": "Вопросы и ответы",
+    "banners_h": "Новинки и предложения", "banner_region": "карусель", "banner_slide": "слайд", "banner_go": "Показать баннер",
+    "banner_sample": "Образец",
     "faq": [
         ["Как сделать заказ?", "Оставьте заявку на сайте, напишите в WhatsApp или позвоните. Менеджер уточнит, для чего нужен продукт, объём, фасовку, регион и сроки, затем пришлёт счёт."],
         ["Как узнать цену и наличие?", "Цены на сайте не публикуем: они зависят от объёма и фасовки. Нажмите «Запросить цену» на карточке товара или напишите в WhatsApp, менеджер назовёт цену и проверит склад."],
@@ -472,6 +475,8 @@ UI["kz"].update({
     "faq_h": "Сұрақтар мен жауаптар",
     "faq_lead": "ХИММАКС өнімін қалай тапсырыс беріп, төлеп, алуға болады.",
     "faq_home_h": "Жиі қойылатын сұрақтар", "faq_all": "Барлық сұрақтар", "nav_faq": "Сұрақтар мен жауаптар",
+    "banners_h": "Жаңалықтар мен ұсыныстар", "banner_region": "карусель", "banner_slide": "слайд", "banner_go": "Баннерді көрсету",
+    "banner_sample": "Үлгі",
     "faq": [
         ["Тапсырысты қалай беруге болады?", "Сайтта өтінім қалдырыңыз, WhatsApp-қа жазыңыз немесе қоңырау шалыңыз. Менеджер өнім не үшін керегін, көлемді, қаптаманы, өңірді және мерзімді нақтылап, шот жібереді."],
         ["Бағасы мен қолда барын қалай білуге болады?", "Бағаларды сайтта жарияламаймыз: олар көлем мен қаптамаға байланысты. Тауар картасындағы «Бағасын сұрау» батырмасын басыңыз немесе WhatsApp-қа жазыңыз, менеджер бағасын айтып, қойманы тексереді."],
@@ -745,6 +750,46 @@ def cat_cards(L, pre, goods, U):
         for c in CATS)
 
 
+def load_banners():
+    """Активные баннеры из src/banners.json: active, даты from/to, образцы только в PREVIEW."""
+    today = datetime.date.today().isoformat()
+    out = []
+    for b in json.loads((SRC / "banners.json").read_text())["banners"]:
+        if not b.get("active") or (b.get("sample") and not PREVIEW):
+            continue
+        if (b.get("from") and today < b["from"]) or (b.get("to") and today > b["to"]):
+            continue
+        out.append(b)
+    return out
+
+
+def banner_slider(L, pre, U, banners):
+    t = UI[L]
+    if not banners:
+        return ""
+    slides = []
+    for i, b in enumerate(banners):
+        link = b["link"]
+        if link.get("quote"):
+            cta = f'<button class="btn btn-primary" type="button" data-quote data-general>{E(b["cta"][L])}</button>'
+        else:
+            href = link["url"] if link.get("url") else pre + U[link["page"]][L] + link.get("query", "")
+            cta = f'<a class="btn btn-primary" href="{href}">{E(b["cta"][L])}</a>'
+        sample = f'<span class="banner-sample">{E(t["banner_sample"])}</span>' if b.get("sample") else ""
+        slides.append(
+            f'<li class="banner" id="banner-{b["id"]}" data-type="{b["type"]}" aria-roledescription="{E(t["banner_slide"])}" '
+            f'aria-label="{i + 1} / {len(banners)}"><div class="banner-text">'
+            f'<h3>{E(b["title"][L])}</h3><p>{E(b["text"][L])}</p>{sample}{cta}</div>'
+            f'<div class="banner-media">{ui_img(b["image"], pre)}</div></li>')
+    dots = "".join(f'<button class="banner-dot" type="button" data-to="{i}" aria-label="{E(t["banner_go"])} {i + 1}"></button>'
+                   for i in range(len(banners))) if len(banners) > 1 else ""
+    nav = (f'<div class="banner-nav"><button class="icon-btn" type="button" data-slide="-1" aria-label="{E(t["prev"])}">{icon("chevron-left")}</button>'
+           f'<div class="banner-dots">{dots}</div>'
+           f'<button class="icon-btn" type="button" data-slide="1" aria-label="{E(t["next"])}">{icon("chevron-right")}</button></div>') if len(banners) > 1 else ""
+    return (f'<section class="container block banners" aria-roledescription="{E(t["banner_region"])}" aria-label="{E(t["banners_h"])}">'
+            f'<ul class="banner-track" data-slider tabindex="0">{"".join(slides)}</ul>{nav}</section>')
+
+
 def faq_list(items, h="h3"):
     return '<div class="faq">' + "".join(
         f'<details class="faq-item"><summary><{h} class="faq-q">{E(q)}</{h}>{icon("chevron-right", "icon faq-chev")}</summary><p>{E(a)}</p></details>'
@@ -848,6 +893,8 @@ def render_home(L, p, goods, U):
     </div>
     <ul class="rail" tabindex="0">{popular}</ul>
   </section>
+
+  {banner_slider(L, pre, U, load_banners())}
 
   <section class="apps-band">
     {ui_img('apps', pre, cls='apps-bg')}
