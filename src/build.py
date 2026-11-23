@@ -35,6 +35,7 @@ UI_IMG = {
     "cat-promyshlennaya-himiya": (747, 249), "cat-dezsredstva": (568, 379), "cat-ochistka-vody": (540, 360),
     "cat-pishchevye-dobavki": (540, 360), "cat-dobavki-k-betonu": (454, 303), "cat-kanistry": (486, 324),
     "cat-rastvoriteli": (561, 373),
+    "head-about": (438, 394), "head-contacts": (562, 384), "delivery": (562, 375),
 }
 HERO_VIDEO = "assets/video/hero.mp4"  # появится файл — герой главной подхватит его фоном
 
@@ -230,6 +231,85 @@ UI = {
     },
 }
 
+# Склад на карте: метка с карты на странице контактов Satu (himmaks.kz/contacts)
+GEO = (52.2716168, 76.9979234)
+
+# Страницы «О компании» и «Контакты». Источник фактов: himmaks.kz/about_us и /contacts (Satu), 23.11.2026
+UI["ru"].update({
+    "about_title": "О компании ХИММАКС: поставщик химии и дезсредств в Павлодаре",
+    "about_desc": "ТОО «ХИММАКС»: офис и склады в Павлодаре, химическая продукция и дезинфицирующие средства оптом и в розницу, доставка по Казахстану.",
+    "about_h": "О компании",
+    "about_lead": "«ХИММАКС» поставляет химическую продукцию и дезинфицирующие средства со склада в Павлодаре.",
+    "about_body": [
+        "Мы торговая компания. Продукция лежит на нашем складе в Павлодаре, на улице Циолковского, там же офис, где менеджеры принимают заказы.",
+        "Покупают у нас промышленные предприятия, крупные компании Казахстана, государственные учреждения и малый бизнес. Продаём оптом и в розницу, от одной канистры до партии, и отправляем по всему Казахстану.",
+        "Если нужной позиции нет в каталоге, напишите. Проверим склад и предложим аналог.",
+    ],
+    "about_facts_h": "Коротко о компании",
+    "about_facts": [
+        ["Форма", "ТОО"], ["Тип", "Торговая компания"], ["Сотрудники", "5-10 человек"],
+        ["Офис и склады", "Павлодар, ул. Циолковского, 144/4"], ["Продажи", "Опт и розница"],
+        ["Доставка", "По всему Казахстану"],
+    ],
+    "clients_h": "Кому поставляем",
+    "clients": [["factory", "Промышленные предприятия"], ["building-2", "Крупные компании Казахстана"],
+                ["landmark", "Государственные учреждения"], ["store", "Малый бизнес"]],
+    "stock_h": "Что на складе",
+    "steps_h": "Как оформить заказ",
+    "steps": [
+        ["Заявка", "Позвоните, напишите в WhatsApp или оставьте заявку на сайте."],
+        ["Цена и документы", "Менеджер уточнит цену, наличие и фасовку и пришлёт документы, которые есть на товар."],
+        ["Отгрузка", "Заберите заказ со склада на Циолковского или закажите доставку по Казахстану."],
+    ],
+    "delivery_alt": "Грузовик на трассе",
+    "contacts_title": "Контакты ХИММАКС: телефоны, WhatsApp, адрес склада в Павлодаре",
+    "contacts_desc": "Павлодар, ул. Циолковского, 144/4. Отдел продаж: +7 (747) 217-55-47, +7 (778) 217-55-47 (WhatsApp). Пн-Пт 9:00-17:00.",
+    "contacts_h": "Контакты",
+    "contacts_lead": "Офис и склады в Павлодаре. Отвечаем в рабочее время.",
+    "c_phones": "Телефоны", "c_write": "Написать", "c_address": "Адрес", "c_hours": "Режим работы",
+    "c_route": "Проезд по ул. Циолковского в сторону Большой объездной дороги (Жібек жолы), не доезжая до неё.",
+    "c_maps": "Открыть в картах", "c_map_title": "Склад ХИММАКС на карте Павлодара",
+    "c_strip_h": "Нужна цена или подбор продукции?",
+    "c_strip_p": "Оставьте заявку: менеджер перезвонит и уточнит цену, наличие и фасовку.",
+})
+UI["kz"].update({
+    "about_title": "ХИММАКС компаниясы туралы: Павлодардағы химия және дезқұралдар жеткізушісі",
+    "about_desc": "«ХИММАКС» ЖШС: кеңсе мен қоймалар Павлодарда, химиялық өнімдер мен дезинфекциялық құралдар көтерме және бөлшек саудада, Қазақстан бойынша жеткізу.",
+    "about_h": "Компания туралы",
+    "about_lead": "«ХИММАКС» Павлодардағы қоймадан химиялық өнімдер мен дезинфекциялық құралдарды жеткізеді.",
+    "about_body": [
+        "Біз сауда компаниясымыз. Өнім Павлодардағы Циолковский көшесіндегі өз қоймамызда тұр, менеджерлер тапсырыс қабылдайтын кеңсе де сонда.",
+        "Бізден өнеркәсіп кәсіпорындары, Қазақстанның ірі компаниялары, мемлекеттік мекемелер және шағын бизнес сатып алады. Көтерме және бөлшек сатамыз, бір канистрден бастап партияға дейін, бүкіл Қазақстанға жібереміз.",
+        "Қажетті позиция каталогта болмаса, жазыңыз. Қойманы тексеріп, баламасын ұсынамыз.",
+    ],
+    "about_facts_h": "Компания туралы қысқаша",
+    "about_facts": [
+        ["Нысаны", "ЖШС"], ["Түрі", "Сауда компаниясы"], ["Қызметкерлер", "5-10 адам"],
+        ["Кеңсе мен қоймалар", "Павлодар, Циолковский к-сі, 144/4"], ["Сауда", "Көтерме және бөлшек"],
+        ["Жеткізу", "Бүкіл Қазақстан бойынша"],
+    ],
+    "clients_h": "Кімге жеткіземіз",
+    "clients": [["factory", "Өнеркәсіп кәсіпорындары"], ["building-2", "Қазақстанның ірі компаниялары"],
+                ["landmark", "Мемлекеттік мекемелер"], ["store", "Шағын бизнес"]],
+    "stock_h": "Қоймада не бар",
+    "steps_h": "Тапсырысты қалай рәсімдеу керек",
+    "steps": [
+        ["Өтінім", "Қоңырау шалыңыз, WhatsApp-қа жазыңыз немесе сайтта өтінім қалдырыңыз."],
+        ["Баға және құжаттар", "Менеджер бағасын, қолда барын және қаптамасын нақтылап, тауарға бар құжаттарды жібереді."],
+        ["Жөнелту", "Тапсырысты Циолковский көшесіндегі қоймадан алып кетіңіз немесе Қазақстан бойынша жеткізуге тапсырыс беріңіз."],
+    ],
+    "delivery_alt": "Тасжолдағы жүк көлігі",
+    "contacts_title": "ХИММАКС байланыстары: телефондар, WhatsApp, Павлодардағы қойма мекенжайы",
+    "contacts_desc": "Павлодар, Циолковский к-сі, 144/4. Сату бөлімі: +7 (747) 217-55-47, +7 (778) 217-55-47 (WhatsApp). Дүйсенбі-жұма 9:00-17:00.",
+    "contacts_h": "Байланыс",
+    "contacts_lead": "Кеңсе мен қоймалар Павлодарда. Жұмыс уақытында жауап береміз.",
+    "c_phones": "Телефондар", "c_write": "Жазу", "c_address": "Мекенжай", "c_hours": "Жұмыс уақыты",
+    "c_route": "Циолковский көшесімен Үлкен айналма жолға (Жібек жолы) қарай жүріп, оған жетпей тоқтаңыз.",
+    "c_maps": "Картадан ашу", "c_map_title": "Павлодар картасындағы ХИММАКС қоймасы",
+    "c_strip_h": "Баға немесе өнім таңдау керек пе?",
+    "c_strip_p": "Өтінім қалдырыңыз: менеджер хабарласып, бағасын, қолда барын және қаптамасын нақтылайды.",
+})
+
 
 # ---------------------------------------------------------------- helpers
 
@@ -266,6 +346,8 @@ def urls(p):
     return {
         "home": {"ru": "", "kz": "kz/"},
         "catalog": {"ru": "catalog/", "kz": "kz/katalog/"},
+        "about": {"ru": "o-kompanii/", "kz": "kz/kompaniya-turaly/"},
+        "contacts": {"ru": "kontakty/", "kz": "kz/baylanys/"},
         "product": {"ru": f"catalog/{p['category']['ru']['slug']}/{p['slug']['ru']}/",
                     "kz": f"kz/katalog/{p['category']['kz']['slug']}/{p['slug']['kz']}/"},
     }
@@ -322,7 +404,7 @@ def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex
 def header(L, here, alts, active, U):
     t = UI[L]
     pre = depth_prefix(here)
-    targets = [U["catalog"][L], None, None, None, None]
+    targets = [U["catalog"][L], U["about"][L], None, None, U["contacts"][L]]
     nav = "".join(
         f'<li><a href="{pre + targets[i] if targets[i] is not None else "#"}"{" aria-current=\"page\"" if i == active else ""}>{E(n)}</a></li>'
         for i, n in enumerate(t["nav"]))
@@ -373,7 +455,8 @@ def footer(L, here, U):
     pre = depth_prefix(here)
     cat_url = pre + U["catalog"][L]
     cats = "".join(f'<li><a href="{cat_url}?cat={c["slug"]}">{E(c[L])}</a></li>' for c in CATS)
-    comp = "".join(f'<li><a href="#">{E(c)}</a></li>' for c in t["foot_company_links"])
+    comp_href = [pre + U["about"][L], "#", pre + U["contacts"][L]]
+    comp = "".join(f'<li><a href="{h}">{E(c)}</a></li>' for c, h in zip(t["foot_company_links"], comp_href))
     docs = "".join(f'<li><a href="#">{E(c)}</a></li>' for c in t["foot_docs_links"])
     phones = "".join(f'<li><a href="tel:{ph["tel"]}">{icon("phone")}<span>{ph["text"]}<small>{E(ph["note"][L])}</small></span></a></li>' for ph in SITE["phones"])
     return f"""<footer class="site-footer">
@@ -469,6 +552,46 @@ def goods_card(g, L, pre, U, tag="li"):
             f'<div class="card-actions"><button class="btn btn-primary btn-sm" type="button" data-quote data-product="{E(name)}">{E(t["quote"])}</button>{more}</div></div></{tag}>')
 
 
+def cat_cards(L, pre, goods, U):
+    t = UI[L]
+    cat_url = pre + U["catalog"][L]
+    counts = {c["slug"]: sum(1 for g in goods if c["slug"] in g["cats"]) for c in CATS}
+    return "".join(
+        f'<li><a class="cat-card" href="{cat_url}?cat={c["slug"]}">{ui_img("cat-" + c["slug"], pre)}'
+        f'<span class="cat-name">{E(c[L])}</span><span class="cat-count">{counts[c["slug"]]} {plural(counts[c["slug"]], t["goods"])}</span></a></li>'
+        for c in CATS)
+
+
+def page_head(L, pre, U, here_key, img, h1, lead):
+    t = UI[L]
+    return f"""<section class="product-head">
+    {ui_img(img, pre, cls='head-bg', eager=True)}
+    <div class="container">
+      <nav class="crumbs" aria-label="breadcrumbs"><ol><li><a href="{pre}{U['home'][L]}">{E(t['home'])}</a></li><li aria-current="page">{E(h1)}</li></ol></nav>
+      <h1>{E(h1)}</h1>
+      <p class="lead">{E(lead)}</p>
+    </div>
+  </section>"""
+
+
+def crumbs_ld(L, U, key, name):
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": UI[L]["home"], "item": f"{DOMAIN}/{U['home'][L]}"},
+        {"@type": "ListItem", "position": 2, "name": name, "item": f"{DOMAIN}/{U[key][L]}"}]}
+
+
+def org_ld():
+    lat, lon = GEO
+    return {"@context": "https://schema.org", "@type": "LocalBusiness", "@id": f"{DOMAIN}/#org", "name": "ХИММАКС",
+            "url": DOMAIN + "/", "logo": f"{DOMAIN}/img/logo.webp", "image": f"{DOMAIN}/img/logo.webp", "email": SITE["email"],
+            "telephone": SITE["phones"][0]["text"],
+            "address": {"@type": "PostalAddress", "streetAddress": "ул. Циолковского, 144/4", "addressLocality": "Павлодар", "addressCountry": "KZ"},
+            "geo": {"@type": "GeoCoordinates", "latitude": lat, "longitude": lon},
+            "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
+                                           "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                                           "opens": "09:00", "closes": "17:00"}]}
+
+
 # ---------------------------------------------------------------- pages
 
 def render_home(L, p, goods, U):
@@ -476,7 +599,6 @@ def render_home(L, p, goods, U):
     here = U["home"][L]
     pre = depth_prefix(here)
     cat_url = pre + U["catalog"][L]
-    counts = {c["slug"]: sum(1 for g in goods if c["slug"] in g["cats"]) for c in CATS}
     ld_org = {"@context": "https://schema.org", "@type": "Organization", "name": "ХИММАКС", "url": DOMAIN + "/",
               "logo": f"{DOMAIN}/img/logo.webp", "email": SITE["email"],
               "telephone": [ph["text"] for ph in SITE["phones"]],
@@ -487,10 +609,7 @@ def render_home(L, p, goods, U):
         video = (f'<video class="hero-video" muted loop playsinline preload="none" poster="{pre}img/ui/hero.webp" '
                  f'data-src="{pre}{HERO_VIDEO}"></video>')
     facts = "".join(f'<li>{icon(ic)}<span>{E(tx)}</span></li>' for ic, tx in t["facts"])
-    cats = "".join(
-        f'<li><a class="cat-card" href="{cat_url}?cat={c["slug"]}">{ui_img("cat-" + c["slug"], pre)}'
-        f'<span class="cat-name">{E(c[L])}</span><span class="cat-count">{counts[c["slug"]]} {plural(counts[c["slug"]], t["goods"])}</span></a></li>'
-        for c in CATS)
+    cats = cat_cards(L, pre, goods, U)
     by_id = {g["id"]: g for g in goods}
     popular = "".join(goods_card(by_id[i], L, pre, U) for i in POPULAR if i in by_id)
     about_list = "".join(f'<li>{icon("circle-check")}<span>{E(x)}</span></li>' for x in t["about_list"])
@@ -523,7 +642,7 @@ def render_home(L, p, goods, U):
         <h2>{E(t['h_about'])}</h2>
         <p>{E(t['about_p'])}</p>
         <ul class="about-list">{about_list}</ul>
-        <a class="btn btn-primary" href="#">{E(t['about_link'])}</a>
+        <a class="btn btn-primary" href="{pre}{U['about'][L]}">{E(t['about_link'])}</a>
       </div>
       <div class="about-media">{ui_img('about', pre, t['about_img_alt'])}</div>
     </div>
@@ -739,13 +858,118 @@ def render_product(L, p, U):
             + header(L, here, U["product"], 0, U) + body + footer(L, here, U) + quote_dialog(L, here, name, p["packs"]))
 
 
+def render_about(L, goods, U):
+    t = UI[L]
+    here = U["about"][L]
+    pre = depth_prefix(here)
+    body_p = "".join(f"<p>{E(x)}</p>" for x in t["about_body"])
+    facts = "".join(f'<div class="spec-row"><dt>{E(k)}</dt><dd>{E(v)}</dd></div>' for k, v in t["about_facts"])
+    clients = "".join(f'<li>{icon(ic)}<span>{E(x)}</span></li>' for ic, x in t["clients"])
+    steps = "".join(f'<li><h3>{E(h)}</h3><p>{E(x)}</p></li>' for h, x in t["steps"])
+    ld_page = {"@context": "https://schema.org", "@type": "AboutPage", "url": f"{DOMAIN}/{here}", "name": t["about_title"],
+               "about": {"@id": f"{DOMAIN}/#org"}}
+
+    body = f"""<main id="main">
+  {page_head(L, pre, U, 'about', 'head-about', t['about_h'], t['about_lead'])}
+
+  <div class="container content-grid">
+    <section class="block"><div class="prose">{body_p}</div></section>
+    <section class="block" aria-labelledby="facts-h"><h2 id="facts-h" class="h-sm">{E(t['about_facts_h'])}</h2><dl class="specs">{facts}</dl></section>
+  </div>
+
+  <div class="band-light"><section class="container block"><h2>{E(t['clients_h'])}</h2><ul class="clients">{clients}</ul></section></div>
+
+  <section class="container block">
+    <div class="block-head"><h2>{E(t['stock_h'])}</h2><a class="text-link" href="{pre}{U['catalog'][L]}">{E(t['cats_all'])}</a></div>
+    <ul class="cat-grid">{cat_cards(L, pre, goods, U)}</ul>
+  </section>
+
+  <section class="container block-end">
+    <div class="about-panel">
+      <div class="about-text">
+        <h2>{E(t['steps_h'])}</h2>
+        <ol class="steps">{steps}</ol>
+        <button class="btn btn-primary" type="button" data-quote data-general>{E(t['quote'])}</button>
+      </div>
+      <div class="about-media">{ui_img('delivery', pre, t['delivery_alt'])}</div>
+    </div>
+  </section>
+
+  {cta_band(L, pre)}
+</main>
+"""
+    return (head(L, t["about_title"], t["about_desc"], here, U["about"], "img/ui/head-about.webp",
+                 [crumbs_ld(L, U, "about", t["about_h"]), org_ld(), ld_page])
+            + header(L, here, U["about"], 1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+
+
+def render_contacts(L, U):
+    t = UI[L]
+    here = U["contacts"][L]
+    pre = depth_prefix(here)
+    lat, lon = GEO
+    phones = "".join(f'<li><a class="c-phone" href="tel:{ph["tel"]}">{ph["text"]}</a><span>{E(ph["note"][L])}</span></li>' for ph in SITE["phones"])
+    maps = [("Яндекс Карты", f"https://yandex.kz/maps/?pt={lon},{lat}&z=17&l=map"),
+            ("2ГИС", f"https://2gis.kz/pavlodar?m={lon},{lat}/17"),
+            ("Google Maps", f"https://www.google.com/maps/search/?api=1&query={lat},{lon}")]
+    map_links = "".join(f'<li><a class="text-link" href="{u}" target="_blank" rel="noopener">{E(n)}</a></li>' for n, u in maps)
+    # OpenStreetMap: без рекламы и трекеров (виджет Яндекса показывал рекламу конкурентов и грузил пиксели DSP)
+    map_src = (f"https://www.openstreetmap.org/export/embed.html?bbox={lon - 0.008:.6f}%2C{lat - 0.004:.6f}%2C"
+               f"{lon + 0.008:.6f}%2C{lat + 0.004:.6f}&layer=mapnik&marker={lat}%2C{lon}")
+
+    body = f"""<main id="main">
+  {page_head(L, pre, U, 'contacts', 'head-contacts', t['contacts_h'], t['contacts_lead'])}
+
+  <div class="container block contacts-grid">
+    <div class="contact-list">
+      <section class="contact-item">
+        <div class="c-head">{icon('phone')}<h2>{E(t['c_phones'])}</h2></div>
+        <ul class="c-phones">{phones}</ul>
+      </section>
+      <section class="contact-item">
+        <div class="c-head">{icon('send')}<h2>{E(t['c_write'])}</h2></div>
+        <div class="actions">
+          <a class="btn btn-primary btn-sm" href="{wa_link(t['wa_hello'])}" target="_blank" rel="noopener">{icon('whatsapp')}{E(t['whatsapp'])}</a>
+          <a class="btn btn-ghost btn-sm" href="mailto:{SITE['email']}">{icon('mail')}{SITE['email']}</a>
+        </div>
+      </section>
+      <section class="contact-item">
+        <div class="c-head">{icon('map-pin')}<h2>{E(t['c_address'])}</h2></div>
+        <p class="c-strong">{E(SITE['address'][L])}</p>
+        <p class="c-note">{E(t['c_route'])}</p>
+        <p class="c-note">{E(t['c_maps'])}:</p>
+        <ul class="c-maps">{map_links}</ul>
+      </section>
+      <section class="contact-item">
+        <div class="c-head">{icon('clock')}<h2>{E(t['c_hours'])}</h2></div>
+        <p class="c-strong">{E(SITE['hours'][L])}</p>
+      </section>
+    </div>
+    <div class="map-frame">
+      <iframe src="{map_src}" title="{E(t['c_map_title'])}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+
+  <section class="container block-end docs-strip">
+    {ui_img('docs', pre, cls='docs-thumb')}
+    <div><h2>{E(t['c_strip_h'])}</h2><p>{E(t['c_strip_p'])}</p></div>
+    <button class="btn btn-primary" type="button" data-quote data-general>{E(t['quote'])}</button>
+  </section>
+</main>
+"""
+    return (head(L, t["contacts_title"], t["contacts_desc"], here, U["contacts"], "img/ui/head-contacts.webp",
+                 [crumbs_ld(L, U, "contacts", t["contacts_h"]), org_ld()])
+            + header(L, here, U["contacts"], 4, U) + body + footer(L, here, U) + quote_dialog(L, here))
+
+
 def main():
     p = json.loads((SRC / "product.json").read_text())
     U = urls(p)
     goods = load_goods(p)
     for L in ("ru", "kz"):
         for kind, html_ in (("home", render_home(L, p, goods, U)), ("catalog", render_catalog(L, p, goods, U)),
-                            ("product", render_product(L, p, U))):
+                            ("product", render_product(L, p, U)), ("about", render_about(L, goods, U)),
+                            ("contacts", render_contacts(L, U))):
             out = OUT / U[kind][L] / "index.html"
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(html_)
