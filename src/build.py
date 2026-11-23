@@ -585,7 +585,7 @@ def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
-{'<meta name="robots" content="noindex">' if noindex else ''}
+{'<meta name="robots" content="noindex">' if noindex or PREVIEW else ''}
 <link rel="canonical" href="{DOMAIN}/{here}">
 <link rel="alternate" hreflang="ru" href="{DOMAIN}/{alts['ru']}">
 <link rel="alternate" hreflang="kk" href="{DOMAIN}/{alts['kz']}">
@@ -1710,6 +1710,7 @@ def main():
     details = json.loads((SRC / "satu-details.json").read_text())
     packs = json.loads((SRC / "catalog-packs.json").read_text())["packs"]
     pages = []
+    page_img = {U["product"]["ru"]: f"{DOMAIN}/img/{p['images'][0]['base']}-{p['images'][0]['widths'][-1]}.webp"}
     for L in ("ru", "kz"):
         for kind, html_ in (("home", render_home(L, p, goods, U)), ("catalog", render_catalog(L, p, goods, U)),
                             ("product", render_product(L, p, U, goods)), ("about", render_about(L, goods, U)),
@@ -1732,6 +1733,7 @@ def main():
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(render_product(L, prod, U, goods))
         pages.append(g["urls"])
+        page_img[g["urls"]["ru"]] = f"{DOMAIN}/{g['img']}"
     print("→ товаров:", sum(1 for g in goods if not g["page"]), "x 2 языка")
 
     for L in ("ru", "kz"):
@@ -1742,15 +1744,39 @@ def main():
     (OUT / "404.html").write_text(render_404(U))
     print("→ site/404.html")
 
-    # sitemap.xml с парами RU/KZ (hreflang)
+    # sitemap.xml: пары RU/KZ + x-default (как на страницах), дата сборки, фото товаров. Без «Спасибо» и 404.
+    today = datetime.date.today().isoformat()
     rows = []
     for alt in {(a["ru"], a["kz"]): a for a in pages}.values():
+        img = page_img.get(alt["ru"])
         for L in ("ru", "kz"):
-            rows.append(f'<url><loc>{DOMAIN}/{alt[L]}</loc>'
+            rows.append(f'<url><loc>{DOMAIN}/{alt[L]}</loc><lastmod>{today}</lastmod>'
                         f'<xhtml:link rel="alternate" hreflang="ru" href="{DOMAIN}/{alt["ru"]}"/>'
-                        f'<xhtml:link rel="alternate" hreflang="kk" href="{DOMAIN}/{alt["kz"]}"/></url>')
+                        f'<xhtml:link rel="alternate" hreflang="kk" href="{DOMAIN}/{alt["kz"]}"/>'
+                        f'<xhtml:link rel="alternate" hreflang="x-default" href="{DOMAIN}/{alt["ru"]}"/>'
+                        + (f'<image:image><image:loc>{img}</image:loc></image:image>' if img else "") + '</url>')
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
-                                     'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(rows) + "\n</urlset>\n")
+                                     'xmlns:xhtml="http://www.w3.org/1999/xhtml" '
+                                     'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' + "\n".join(rows) + "\n</urlset>\n")
+
+    # robots.txt для рабочего домена (на GitHub Pages в подпапке его не читают, там закрывает noindex)
+    clean = "cat&q&use&pack"
+    (OUT / "robots.txt").write_text(f"""User-agent: *
+Disallow: /spasibo/
+Disallow: /kz/rahmet/
+Disallow: /*?*q=
+Disallow: /*?*use=
+Disallow: /*?*pack=
+
+User-agent: Yandex
+Disallow: /spasibo/
+Disallow: /kz/rahmet/
+Clean-param: {clean} /catalog/
+Clean-param: {clean} /kz/katalog/
+
+Sitemap: {DOMAIN}/sitemap.xml
+""")
+    print("→ robots.txt")
     print("→ sitemap.xml:", len(rows), "адресов")
 
 
