@@ -177,6 +177,12 @@
     const radio = $(`input[name="cat"][value="${CSS.escape(startCat)}"]`);
     if (radio) radio.checked = true;
     if (params.get('q')) q.value = params.get('q');
+    // Назначение и фасовка: внутри группы флажков «или», между группами «и»
+    const facets = { use: 'fuse', pack: 'fpack' };
+    Object.entries(facets).forEach(([param, name]) => (params.get(param) || '').split(',').filter(Boolean)
+      .forEach(v => { const box = $(`input[name="${name}"][value="${CSS.escape(v)}"]`); if (box) box.checked = true; }));
+    const picked = name => $$(`input[name="${name}"]:checked`).map(b => b.value);
+    const hasAny = (attr, want) => !want.length || want.some(v => attr.split(' ').includes(v));
 
     const apply = (resetLimit = true) => {
       if (resetLimit) limit = PAGE;
@@ -186,8 +192,10 @@
         ? initial.slice().sort((a, b) => a.dataset.name.localeCompare(b.dataset.name, 'ru'))
         : initial;
       ordered.forEach(c => list.append(c));
+      const uses = picked('fuse'), packs = picked('fpack');
       const match = ordered.filter(c =>
         (!cat || c.dataset.cats.split(' ').includes(cat)) &&
+        hasAny(c.dataset.use, uses) && hasAny(c.dataset.pack, packs) &&
         (!stock.checked || c.dataset.stock === '1') &&
         (!term || c.dataset.name.includes(term)));
       cards.forEach(c => c.hidden = true);
@@ -199,10 +207,12 @@
       const u = new URL(location.href);
       cat ? u.searchParams.set('cat', cat) : u.searchParams.delete('cat');
       term ? u.searchParams.set('q', term) : u.searchParams.delete('q');
+      uses.length ? u.searchParams.set('use', uses.join(',')) : u.searchParams.delete('use');
+      packs.length ? u.searchParams.set('pack', packs.join(',')) : u.searchParams.delete('pack');
       history.replaceState(null, '', u);
     };
 
-    $$('input[name="cat"]').forEach(r => r.addEventListener('change', () => apply()));
+    $$('input[name="cat"], input[name="fuse"], input[name="fpack"]').forEach(r => r.addEventListener('change', () => apply()));
     stock.addEventListener('change', () => apply());
     sort.addEventListener('change', () => apply());
     q.addEventListener('input', () => apply());
@@ -210,6 +220,7 @@
     $$('[data-reset]').forEach(b => b.addEventListener('click', () => {
       $('input[name="cat"][value=""]').checked = true;
       stock.checked = false; q.value = ''; sort.value = 'default';
+      $$('input[name="fuse"], input[name="fpack"]').forEach(b => { b.checked = false; });
       apply();
     }));
     // Фильтры раскрыты на десктопе и свёрнуты на телефоне

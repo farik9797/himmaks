@@ -103,6 +103,8 @@ UI = {
         "cat_lead": "{n} {pos} в {g} группах. Цену, наличие и фасовку уточнит менеджер.",
         "search": "Поиск по названию", "search_ph": "Например, сода или перекись",
         "groups": "Группы", "all_goods": "Все товары", "filters": "Фильтры", "only_stock": "Только в наличии",
+        "f_use": "Назначение", "f_pack_short": "Фасовка",
+        "pack_note": "Фасовка указана у {n} из {m} товаров. У остальных её уточнит менеджер.",
         "reset": "Сбросить", "found": "Найдено:", "sort": "Сортировка", "sort_default": "Сначала в наличии", "sort_az": "По алфавиту",
         "show_more": "Показать ещё", "empty_h": "Ничего не нашлось", "empty_p": "Измените запрос или напишите нам: подберём аналог.",
         "aside_h": "Не нашли нужный товар?", "aside_p": "Напишите, что нужно: проверим склад и предложим аналог.",
@@ -187,6 +189,8 @@ UI = {
         "cat_lead": "{g} топта {n} позиция. Бағасын, қолда барын және қаптамасын менеджер нақтылайды.",
         "search": "Атауы бойынша іздеу", "search_ph": "Мысалы, сода немесе асқын тотық",
         "groups": "Топтар", "all_goods": "Барлық тауарлар", "filters": "Сүзгілер", "only_stock": "Тек қоймада барлары",
+        "f_use": "Мақсаты", "f_pack_short": "Қаптама",
+        "pack_note": "Қаптама {m} тауардың {n}-інде көрсетілген. Қалғанын менеджер нақтылайды.",
         "reset": "Тазарту", "found": "Табылды:", "sort": "Сұрыптау", "sort_default": "Алдымен қоймада барлары", "sort_az": "Әліпби бойынша",
         "show_more": "Тағы көрсету", "empty_h": "Ештеңе табылмады", "empty_p": "Сұранысты өзгертіңіз немесе бізге жазыңыз: баламасын табамыз.",
         "aside_h": "Қажетті тауарды таппадыңыз ба?", "aside_p": "Не керегін жазыңыз: қойманы тексеріп, баламасын ұсынамыз.",
@@ -700,9 +704,51 @@ def quote_dialog(L, here, product=None, packs=None):
 
 # ---------------------------------------------------------------- catalog data
 
+# Назначение (фильтр каталога): база — группа Satu, куда клиент поставил товар, плюс области, прямо названные в описании Satu.
+# Тару (канистры) не размечаем: для неё есть своя группа.
+USES = [
+    ("voda", {"ru": "Водоподготовка и бассейны", "kz": "Суды дайындау және бассейндер"},
+     r"водоподготов|водоочист|очистк[аи] вод|питьев|сточн|бассейн|обеззараживани[ея] вод"),
+    ("pishch", {"ru": "Пищевая промышленность", "kz": "Тамақ өнеркәсібі"}, r"пищев|кондитер|хлебопек|молочн|мясн|напитк|консерв"),
+    ("agro", {"ru": "Сельское хозяйство и животноводство", "kz": "Ауыл және мал шаруашылығы"},
+     r"сельск|животновод|птиц|корм|удобрени|растени|ветеринар"),
+    ("stroy", {"ru": "Строительство", "kz": "Құрылыс"}, r"бетон|цемент|строит|гололед|противомороз|штукатур"),
+    ("dez", {"ru": "Дезинфекция и санобработка", "kz": "Дезинфекция және санитарлық өңдеу"}, r"дезинфек|антисепт|санобработ|санитарн"),
+    ("prom", {"ru": "Промышленность", "kz": "Өнеркәсіп"}, r"промышленн|производств|металлург|нефт|целлюлоз|текстил|гальван"),
+]
+USE_BY_CAT = {"ochistka-vody": "voda", "pishchevye-dobavki": "pishch", "kormovye-dobavki": "agro", "dobavki-k-betonu": "stroy",
+              "dezsredstva": "dez", "promyshlennaya-himiya": "prom", "rastvoriteli": "prom"}
+PACK_CLASSES = [("s", {"ru": "До 5 кг или л", "kz": "5 кг немесе л дейін"}),
+                ("m", {"ru": "6-30 кг или л", "kz": "6-30 кг немесе л"}),
+                ("l", {"ru": "От 31 кг или л", "kz": "31 кг немесе л бастап"})]
+PACK_KZ = [("мешок", "қап"), ("канистры, еврокубы, бочки", "канистрлер, еврокубтар, бөшкелер"), ("канистра", "канистр"),
+           ("банка", "банка"), ("ПЭТ-тара", "ПЭТ-ыдыс")]
+
+
+def pack_classes(text):
+    """Класс фасовки по числу кг/л в строке: до 5, 6-30, от 31. мл — мелкая, еврокубы и бочки — крупная."""
+    if "мл" in text:
+        return {"s"}
+    nums = [float(x.replace(",", ".")) for x in re.findall(r"\d+(?:,\d+)?", text)]
+    out = {"s" if n <= 5 else "m" if n <= 30 else "l" for n in nums}
+    if re.search(r"еврокуб|бочк", text):
+        out.add("l")
+    return out
+
+
+def pack_text(packs, L):
+    txt = ", ".join(packs)
+    if L == "kz":
+        for a, b in PACK_KZ:
+            txt = txt.replace(a, b)
+    return txt
+
+
 def load_goods(p):
     """Товары с Satu + замены: два листинга гипохлорита натрия сведены в одну карточку с готовой страницей."""
     raw = json.loads((SRC / "catalog-satu.json").read_text())
+    packs = json.loads((SRC / "catalog-packs.json").read_text())["packs"]
+    details = json.loads((SRC / "satu-details.json").read_text())
     goods, gipo = [], None
     for g in raw:
         item = {"id": g["id"], "cats": [g["cat"]], "name": g["name"], "img": f"img/p/{g['id']}.webp",
@@ -711,16 +757,31 @@ def load_goods(p):
         # соль «для промышленного потребления и кормовых целей» оставляем и в промышленной химии
         if "кормов" in g["name"].lower():
             item["cats"] = [c for c in item["cats"] if c != "pishchevye-dobavki"] + ["kormovye-dobavki"]
+        item["packs"] = packs.get(g["id"], {}).get("packs", [])
+        info = details.get(g["id"], {})
+        text = " ".join([g["name"], info.get("desc", ""), " ".join(info.get("props", {}).values())])
+        uses = [] if g["cat"] == "kanistry" else [USE_BY_CAT[c] for c in item["cats"] if c in USE_BY_CAT]
+        if g["cat"] != "kanistry":
+            uses += [k for k, _, rx in USES if re.search(rx, text, re.I)]
+        item["uses"] = uses
         if g["name"].strip() == "Гипохлорит натрия":
             if gipo is None:
                 gipo = item
                 item.update(id="gipohlorit-natriya", name=p["name"]["ru"], name_kz=p["name"]["kz"],
                             img="img/gipohlorit-natriya-480.webp", page=True)
+                # фасовка с этикетки (product.json) + фасовки из листинга Satu
+                item["packs"] = [k["label"]["ru"].lower() for k in p["packs"]] + item["packs"]
                 goods.append(item)
-            elif g["cat"] not in gipo["cats"]:
-                gipo["cats"].append(g["cat"])
+            else:
+                gipo["cats"] += [c for c in item["cats"] if c not in gipo["cats"]]
+                gipo["packs"] += [x for x in item["packs"] if x not in gipo["packs"]]
+                gipo["uses"] += item["uses"]
             continue
         goods.append(item)
+    order = [k for k, _, _ in USES]
+    for g in goods:
+        g["uses"] = sorted(set(g["uses"]), key=order.index)
+        g["pk"] = sorted(set().union(*[pack_classes(x) for x in g["packs"]]) if g["packs"] else set())
     return goods
 
 
@@ -735,8 +796,10 @@ def goods_card(g, L, pre, U, tag="li"):
     stock = (f'<p class="status">{icon("circle-check")}{E(t["in_stock"])}</p>' if g["stock"]
              else f'<p class="status status-off">{E(t["out_stock"])}</p>')
     more = f'<a class="text-link card-more" href="{href}">{E(t["more"])}</a>' if href else ""
-    return (f'<{tag} class="card" data-cats="{" ".join(g["cats"])}" data-name="{E(name.lower())}" data-stock="{int(g["stock"])}">'
-            f'{media}<div class="card-body"><p class="card-cat">{E(cat_name)}</p><h3 class="card-title">{title}</h3>{stock}'
+    pack = f'<p class="card-pack">{E(t["f_pack_short"])}: {E(pack_text(g["packs"], L))}</p>' if g["packs"] else ""
+    return (f'<{tag} class="card" data-cats="{" ".join(g["cats"])}" data-name="{E(name.lower())}" data-stock="{int(g["stock"])}" '
+            f'data-use="{" ".join(g["uses"])}" data-pack="{" ".join(g["pk"])}">'
+            f'{media}<div class="card-body"><p class="card-cat">{E(cat_name)}</p><h3 class="card-title">{title}</h3>{pack}{stock}'
             f'<div class="card-actions"><button class="btn btn-primary btn-sm" type="button" data-quote data-product="{E(name)}">{E(t["quote"])}</button>{more}</div></div></{tag}>')
 
 
@@ -928,6 +991,13 @@ def render_catalog(L, p, goods, U):
     cards = "".join(goods_card(g, L, pre, U) for g in order)
     groups = (f'<label class="group"><input type="radio" name="cat" value="" checked><span>{E(t["all_goods"])}</span><span class="group-n">{len(goods)}</span></label>'
               + "".join(f'<label class="group"><input type="radio" name="cat" value="{c["slug"]}"><span>{E(c[L])}</span><span class="group-n">{counts[c["slug"]]}</span></label>' for c in CATS))
+    def checks(name, opts, key):
+        return "".join(
+            f'<label class="check"><input type="checkbox" name="{name}" value="{k}"><span>{E(lbl[L])}</span>'
+            f'<span class="group-n">{sum(1 for g in goods if k in g[key])}</span></label>' for k, lbl in opts)
+    uses = checks("fuse", [(k, lbl) for k, lbl, _ in USES], "uses")
+    packs = checks("fpack", PACK_CLASSES, "pk")
+    n_packed = sum(1 for g in goods if g["pk"])
     ld_bc = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": t["home"], "item": f"{DOMAIN}/{U['home'][L]}"},
         {"@type": "ListItem", "position": 2, "name": t["catalog"], "item": f"{DOMAIN}/{here}"}]}
@@ -948,6 +1018,9 @@ def render_catalog(L, p, goods, U):
       <details class="filters" open>
         <summary>{icon('sliders-horizontal')}{E(t['filters'])}</summary>
         <fieldset class="groups"><legend>{E(t['groups'])}</legend>{groups}</fieldset>
+        <fieldset class="facet"><legend>{E(t['f_use'])}</legend>{uses}</fieldset>
+        <fieldset class="facet"><legend>{E(t['f_pack_short'])}</legend>{packs}
+          <p class="facet-note">{E(t['pack_note'].format(n=n_packed, m=len(goods)))}</p></fieldset>
         <label class="check"><input type="checkbox" name="stock"><span>{E(t['only_stock'])}</span></label>
         <button class="text-link reset" type="button" data-reset>{E(t['reset'])}</button>
       </details>
