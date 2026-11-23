@@ -135,6 +135,26 @@
     hv.play().catch(() => {});
   }
 
+  // ---------- Главная: баннеры новинок и акций (без автопрокрутки)
+  const track = $('[data-slider]');
+  if (track) {
+    const slides = $$('.banner', track), dots = $$('.banner-dot');
+    const current = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = i => {
+      const n = (i + slides.length) % slides.length;
+      track.scrollTo({ left: slides[n].offsetLeft - slides[0].offsetLeft, behavior: reduce ? 'auto' : 'smooth' });
+    };
+    const mark = () => dots.forEach((d, i) => d.setAttribute('aria-current', String(i === current())));
+    $$('[data-slide]').forEach(b => b.addEventListener('click', () => go(current() + Number(b.dataset.slide))));
+    dots.forEach(d => d.addEventListener('click', () => go(Number(d.dataset.to))));
+    track.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); go(current() + (e.key === 'ArrowRight' ? 1 : -1)); }
+    });
+    let timer;
+    track.addEventListener('scroll', () => { clearTimeout(timer); timer = setTimeout(mark, 80); }, { passive: true });
+    mark();
+  }
+
   // ---------- Главная: лента популярных товаров
   const rail = $('.rail');
   $$('[data-rail]').forEach(btn => btn.addEventListener('click', () => {
