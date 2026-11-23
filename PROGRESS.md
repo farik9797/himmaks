@@ -11,7 +11,9 @@
   - Иконки: Lucide 0.460.0 и simple-icons 13 (WhatsApp), исходники в `src/icons/`, в HTML вставляются инлайном.
   - Фото: `site/img/gipohlorit-natriya-{480,800,1029}.{webp,avif}` (оригинал со склада, с Satu). Логотип: `site/img/logo.webp` (с Satu).
   - Проверено: Hallmark sloplint (0 FAIL на RU и KZ), браузер 1440/375, форма, WhatsApp-ссылки, переключатель RU/KZ.
-- Превью: `python3 -m http.server 8737 --directory site`.
+- Превью локально: `python3 -m http.server 8737 --directory site`.
+- Превью для клиента: https://farik9797.github.io/himmaks/ (репо farik9797/himmaks, ветка gh-pages = папка site).
+  Обновить: `python3 src/build.py && git add -A && git commit -m "..." && git push && git subtree split --prefix site -b gh-pages && git push -f origin gh-pages`.
 
 ## Ключевые решения
 - Демо-значения из макета не используются: концентрации 12%, плотности 1,20 и срока 6 мес. нет ни в одном источнике.
