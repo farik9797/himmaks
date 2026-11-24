@@ -6,7 +6,7 @@
 SITE / UI / CATS ниже (настройки компании, строки интерфейса, группы каталога).
 PREVIEW = True показывает документы-заглушки с пометкой «образец» (на проде — False).
 """
-import json, re, html, datetime
+import json, re, html, datetime, shutil
 from pathlib import Path
 from urllib.parse import quote
 
@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / "src", ROOT / "site"
 DOMAIN = "https://himmaks.kz"
 PREVIEW = True
+# Клиенты с логотипами: страница «Клиенты» и пункт меню появляются, только когда список не пуст
+CLIENTS = json.loads((SRC / "clients.json").read_text())["clients"]
 E = html.escape
 
 SITE = {
@@ -637,6 +639,7 @@ def urls(p):
         "delivery": {"ru": "dostavka-i-oplata/", "kz": "kz/zhetkizu-zhane-tolem/"},
         "faq": {"ru": "voprosy-i-otvety/", "kz": "kz/suraqtar-men-zhauaptar/"},
         "privacy": {"ru": "politika-konfidencialnosti/", "kz": "kz/qupiyalylyq-sayasaty/"},
+        "clients": {"ru": "klienty/", "kz": "kz/klientter/"},
         "thanks": {"ru": "spasibo/", "kz": "kz/rahmet/"},
         "product": {"ru": f"catalog/{p['category']['ru']['slug']}/{p['slug']['ru']}/",
                     "kz": f"kz/katalog/{p['category']['kz']['slug']}/{p['slug']['kz']}/"},
@@ -736,20 +739,22 @@ def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex
 def header(L, here, alts, active, U):
     t = UI[L]
     pre = depth_prefix(here)
-    targets = [U["catalog"][L], U["about"][L], U["docs"][L], U["delivery"][L], U["contacts"][L]]
+    items = list(zip(["catalog", "about", "docs", "delivery", "contacts"], t["nav"]))
+    if CLIENTS:
+        items.insert(2, ("clients", t["clients_nav"]))
     nav = "".join(
-        f'<li><a href="{pre + targets[i] if targets[i] is not None else "#"}"{" aria-current=\"page\"" if i == active else ""}>{E(n)}</a></li>'
-        for i, n in enumerate(t["nav"]))
+        f'<li><a href="{pre + U[k][L]}"{" aria-current=\"page\"" if k == active else ""}>{E(n)}</a></li>'
+        for k, n in items)
     lang = (f'<div class="lang" role="group" aria-label="{E(t["lang_switch"])}">'
             f'<a href="{pre}{alts["ru"]}" hreflang="ru" lang="ru"{" aria-current=\"true\"" if L == "ru" else ""}>RU</a>'
             f'<a href="{pre}{alts["kz"]}" hreflang="kk" lang="kk"{" aria-current=\"true\"" if L == "kz" else ""}>KZ</a></div>')
     ph = SITE["phones"][0]
-    return f"""<header class="site-header">
+    return f"""<header class="site-header{" nav-6" if CLIENTS else ""}">
   <div class="container header-row">
     <a class="logo" href="{pre}{U['home'][L]}"><img src="{pre}img/logo.webp" width="240" height="165" alt="ХИММАКС"></a>
     <nav class="main-nav" id="site-nav" aria-label="{E(t['menu'])}"><ul>{nav}</ul>{lang.replace('class="lang"', 'class="lang lang-nav"')}</nav>
     <div class="header-actions">
-      <a class="header-phone" href="tel:{ph['tel']}">{icon('phone')}<span>{ph['text']}</span></a>
+      <a class="header-phone" href="tel:{ph['tel']}" aria-label="{ph['text']}">{icon('phone')}<span>{ph['text']}</span></a>
       {lang}
       <button class="btn btn-primary btn-sm header-cta" type="button" data-quote data-general>{E(t['quote'])}</button>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="{E(t['menu'])}">{icon('menu', 'icon i-open')}{icon('x', 'icon i-close')}</button>
@@ -1242,7 +1247,7 @@ def render_home(L, p, goods, U):
 </main>
 """
     return (head(L, t["home_title"], t["home_desc"], here, U["home"], "img/gipohlorit-natriya-1029.webp", [])
-            + header(L, here, U["home"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["home"], None, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def render_catalog(L, p, goods, U):
@@ -1311,7 +1316,7 @@ def render_catalog(L, p, goods, U):
          "name": g.get("name_kz") if L == "kz" and g.get("name_kz") else g["name"]} for i, g in enumerate(order)]}
     return (head(L, t["cat_title"], t["cat_desc"], here, U["catalog"], "img/ui/head-catalog.webp", [ld_bc, ld_items],
                  page_type="CollectionPage")
-            + header(L, here, U["catalog"], 0, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["catalog"], "catalog", U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def img_url(i):
@@ -1476,7 +1481,7 @@ def render_product(L, p, U, goods=()):
 """
     og = img_url(imgs[0]) if imgs else "img/logo.webp"
     return (head(L, p["seo"][L]["title"], p["seo"][L]["description"], here, PU, og, [ld_bc, ld_product], og_type="product", page_type="ItemPage")
-            + header(L, here, PU, 0, U) + body + footer(L, here, U) + quote_dialog(L, here, name, p["packs"]))
+            + header(L, here, PU, "catalog", U) + body + footer(L, here, U) + quote_dialog(L, here, name, p["packs"]))
 
 
 def render_about(L, goods, U):
@@ -1526,7 +1531,7 @@ def render_about(L, goods, U):
 """
     return (head(L, t["about_title"], t["about_desc"], here, U["about"], "img/ui/head-about.webp",
                  [crumbs_ld(L, U, "about", t["about_h"])], page_type="AboutPage")
-            + header(L, here, U["about"], 1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["about"], "about", U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def render_contacts(L, U):
@@ -1585,7 +1590,7 @@ def render_contacts(L, U):
 """
     return (head(L, t["contacts_title"], t["contacts_desc"], here, U["contacts"], "img/ui/head-contacts.webp",
                  [crumbs_ld(L, U, "contacts", t["contacts_h"])], page_type="ContactPage")
-            + header(L, here, U["contacts"], 4, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["contacts"], "contacts", U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def render_docs(L, U):
@@ -1621,7 +1626,7 @@ def render_docs(L, U):
 </main>
 """
     return (head(L, t["docs_title"], t["docs_desc"], here, U["docs"], "img/ui/docs.webp", [crumbs_ld(L, U, "docs", t["docs_h"])])
-            + header(L, here, U["docs"], 2, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["docs"], "docs", U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def render_delivery(L, U):
@@ -1672,7 +1677,7 @@ def render_delivery(L, U):
 """
     return (head(L, t["delivery_title"], t["delivery_desc"], here, U["delivery"], "img/ui/head-delivery.webp",
                  [crumbs_ld(L, U, "delivery", t["delivery_h"])])
-            + header(L, here, U["delivery"], 3, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["delivery"], "delivery", U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def render_faq(L, U):
@@ -1691,7 +1696,43 @@ def render_faq(L, U):
 """
     return (head(L, t["faq_title"], t["faq_desc"], here, U["faq"], "img/ui/head-catalog.webp",
                  [crumbs_ld(L, U, "faq", t["faq_h"]), faq_ld(t["faq"])], page_type="FAQPage")
-            + header(L, here, U["faq"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["faq"], None, U) + body + footer(L, here, U) + quote_dialog(L, here))
+
+
+UI["ru"].update({
+    "clients_nav": "Клиенты",
+    "clients_title": "Клиенты ХИММАКС: компании, которые выбирают нас",
+    "clients_desc": "Предприятия и организации Казахстана, которым ХИММАКС поставляет химическую продукцию со склада в Павлодаре.",
+    "clients_h1": "Компании, которые выбирают ХИММАКС",
+    "clients_lead": "Поставляем химию предприятиям и организациям со склада в Павлодаре.",
+    "clients_h2": "Нам доверяют",
+})
+UI["kz"].update({
+    "clients_nav": "Клиенттер",
+    "clients_title": "ХИММАКС клиенттері: бізді таңдайтын компаниялар",
+    "clients_desc": "ХИММАКС Павлодардағы қоймадан химиялық өнім жеткізетін Қазақстан кәсіпорындары мен ұйымдары.",
+    "clients_h1": "ХИММАКС-ты таңдайтын компаниялар",
+    "clients_lead": "Павлодардағы қоймадан кәсіпорындар мен ұйымдарға химия жеткіземіз.",
+    "clients_h2": "Бізге сенім артады",
+})
+
+
+def render_clients(L, U):
+    t = UI[L]
+    here = U["clients"][L]
+    pre = depth_prefix(here)
+    logos = "".join(f'<li><img src="{pre}img/clients/{E(c["logo"])}" alt="{E(c["name"])}" loading="lazy"></li>' for c in CLIENTS)
+    body = f"""<main id="main">
+  {page_head(L, pre, U, 'clients', 'head-about', t['clients_h1'], t['clients_lead'])}
+  <section class="container block">
+    <h2>{E(t['clients_h2'])}</h2>
+    <ul class="logo-wall">{logos}</ul>
+  </section>
+  {cta_band(L, pre)}
+</main>
+"""
+    return (head(L, t["clients_title"], t["clients_desc"], here, U["clients"], "img/logo.webp", [crumbs_ld(L, U, "clients", t["clients_h1"])])
+            + header(L, here, U["clients"], "clients", U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 def render_privacy(L, U):
@@ -1713,7 +1754,7 @@ def render_privacy(L, U):
 </main>
 """
     return (head(L, c["title"], c["desc"], here, U["privacy"], "img/ui/docs.webp", [crumbs_ld(L, U, "privacy", c["h1"])])
-            + header(L, here, U["privacy"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+            + header(L, here, U["privacy"], None, U) + body + footer(L, here, U) + quote_dialog(L, here))
 
 
 T404 = {
@@ -1784,7 +1825,7 @@ def render_thanks(L, U):
 </main>
 """
     html_ = (head(L, r["title"], r["lead"], here, U["thanks"], "img/logo.webp", noindex=True)
-             + header(L, here, U["thanks"], -1, U) + body + footer(L, here, U) + quote_dialog(L, here))
+             + header(L, here, U["thanks"], None, U) + body + footer(L, here, U) + quote_dialog(L, here))
     return re.sub(r'<link rel="(?:canonical|alternate)"[^>]*>\n?', "", html_)
 
 
@@ -1830,7 +1871,7 @@ def render_404(U):
 }})();</script>
 """
     html_ = (head(L, r["title"], r["lead"], "", U["home"], "img/logo.webp", noindex=True)
-             + header(L, "", U["home"], -1, U) + body + footer(L, "", U) + quote_dialog(L, ""))
+             + header(L, "", U["home"], None, U) + body + footer(L, "", U) + quote_dialog(L, ""))
     # относительные пути -> абсолютные от корня сайта
     html_ = re.sub(r'(\s(?:href|src|action|data-src|poster)=")(?!https?:|/|#|mailto:|tel:|data:)([^"]*)"',
                    lambda m: f'{m.group(1)}{SITE_BASE}{m.group(2)}"', html_)
@@ -1872,6 +1913,18 @@ def main():
         pages.append(g["urls"])
         page_img[g["urls"]["ru"]] = f"{DOMAIN}/{g['img']}"
     print("→ товаров:", sum(1 for g in goods if not g["page"]), "x 2 языка")
+
+    # Клиенты: только при реальных логотипах в src/clients.json
+    if CLIENTS:
+        (OUT / "img" / "clients").mkdir(parents=True, exist_ok=True)
+        for c in CLIENTS:
+            shutil.copy(SRC / "client-logos" / c["logo"], OUT / "img" / "clients" / c["logo"])
+        for L in ("ru", "kz"):
+            out = OUT / U["clients"][L] / "index.html"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(render_clients(L, U))
+        pages.append(U["clients"])
+        print("→ клиенты:", len(CLIENTS))
 
     for L in ("ru", "kz"):
         out = OUT / U["thanks"][L] / "index.html"
