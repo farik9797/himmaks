@@ -1228,8 +1228,9 @@ def render_home(L, p, goods, U):
   {banner_slider(L, pre, U, load_banners())}
 
   <section class="apps-band">
-    {ui_img('apps', pre, cls='apps-bg')}
+    <img class="apps-bg" src="{pre}img/ui/apps-1600.webp" srcset="{pre}img/ui/apps-960.webp 960w, {pre}img/ui/apps-1600.webp 1600w, {pre}img/ui/apps-2400.webp 2400w" sizes="100vw" width="2400" height="1350" alt="" loading="lazy" decoding="async">
     <div class="container apps-row"><h2>{E(t['h_apps'])}</h2><ul class="app-links">{apps}</ul></div>
+    <p class="photo-credit">{E(t['photo'])}: <a href="https://commons.wikimedia.org/wiki/File:Siloam_Springs_WWTP_003.jpg" target="_blank" rel="noopener">Brandonrush</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ru" target="_blank" rel="noopener">CC BY-SA 3.0</a></p>
   </section>
 
   <section class="container block docs-strip">
@@ -1706,7 +1707,7 @@ UI["ru"].update({
     "clients_h1": "Компании, которые выбирают ХИММАКС",
     "clients_lead": "Поставляем химию предприятиям и организациям со склада в Павлодаре.",
     "clients_h2": "Нам доверяют",
-    "marquee_pause": "Остановить", "marquee_play": "Запустить",
+    "photo": "Фото",
 })
 UI["kz"].update({
     "clients_nav": "Клиенттер",
@@ -1715,7 +1716,7 @@ UI["kz"].update({
     "clients_h1": "ХИММАКС-ты таңдайтын компаниялар",
     "clients_lead": "Павлодардағы қоймадан кәсіпорындар мен ұйымдарға химия жеткіземіз.",
     "clients_h2": "Бізге сенім артады",
-    "marquee_pause": "Тоқтату", "marquee_play": "Іске қосу",
+    "photo": "Фото",
 })
 
 
@@ -1740,9 +1741,7 @@ def render_clients(L, U):
     body = f"""<main id="main">
   {page_head(L, pre, U, 'clients', 'head-about', t['clients_h1'], t['clients_lead'])}
   <section class="block clients-block" aria-labelledby="trust-h">
-    <div class="container block-head"><h2 id="trust-h">{E(t['clients_h2'])}</h2>
-      <button class="btn btn-ghost btn-sm marquee-toggle" type="button" data-marquee-toggle>{icon('pause', 'icon i-pause')}{icon('play', 'icon i-play')}<span data-on="{E(t['marquee_pause'])}" data-off="{E(t['marquee_play'])}">{E(t['marquee_pause'])}</span></button>
-    </div>
+    <div class="container block-head"><h2 id="trust-h">{E(t['clients_h2'])}</h2></div>
     <div class="marquee" data-marquee>{lanes}</div>
   </section>
   {cta_band(L, pre)}

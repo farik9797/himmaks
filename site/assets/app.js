@@ -235,16 +235,3 @@
     apply();
   }
 })();
-
-// ---------- Клиенты: пауза бегущих лент логотипов (WCAG 2.2.2: движение дольше 5 секунд можно остановить)
-(() => {
-  const btn = document.querySelector('[data-marquee-toggle]'), box = document.querySelector('[data-marquee]');
-  if (!btn || !box) return;
-  const label = btn.querySelector('span');
-  btn.addEventListener('click', () => {
-    const paused = !btn.hasAttribute('data-paused');
-    btn.toggleAttribute('data-paused', paused);
-    box.classList.toggle('is-paused', paused);
-    label.textContent = paused ? label.dataset.off : label.dataset.on;
-  });
-})();
