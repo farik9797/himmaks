@@ -72,7 +72,7 @@
     '.cat-grid > li', '.rail > .card', '.why > li', '.steps > li', '.info-grid > li', '.clients > li',
     '.regions > li', '.faq-item', '.app-links > li', '.pay-list > li',
     '.about-panel', '.banner-track', '.docs-strip', '.cta-text', '.cta-side',
-    '.contact-item', '.map-frame', '.specs', '.prose', '.review',
+    '.contact-item', '.map-frame', '.specs', '.prose', '.review', '.marquee',
   ].join(',');
   const items = gsap.utils.toArray(reveal).filter(el => !el.closest('.home-hero, .product-head, dialog'));
   gsap.set(items, { y: 28, autoAlpha: 0 });
