@@ -1706,6 +1706,7 @@ UI["ru"].update({
     "clients_h1": "Компании, которые выбирают ХИММАКС",
     "clients_lead": "Поставляем химию предприятиям и организациям со склада в Павлодаре.",
     "clients_h2": "Нам доверяют",
+    "marquee_pause": "Остановить", "marquee_play": "Запустить",
 })
 UI["kz"].update({
     "clients_nav": "Клиенттер",
@@ -1714,6 +1715,7 @@ UI["kz"].update({
     "clients_h1": "ХИММАКС-ты таңдайтын компаниялар",
     "clients_lead": "Павлодардағы қоймадан кәсіпорындар мен ұйымдарға химия жеткіземіз.",
     "clients_h2": "Бізге сенім артады",
+    "marquee_pause": "Тоқтату", "marquee_play": "Іске қосу",
 })
 
 
@@ -1721,12 +1723,27 @@ def render_clients(L, U):
     t = UI[L]
     here = U["clients"][L]
     pre = depth_prefix(here)
-    logos = "".join(f'<li><img src="{pre}img/clients/{E(c["logo"])}" alt="{E(c["name"])}" loading="lazy"></li>' for c in CLIENTS)
+
+    def tile(c, hidden=False):
+        alt = "" if hidden else E(c["name"])
+        return (f'<li><figure class="logo-tile"><span class="logo-box{" is-dark" if c.get("dark") else ""}"><img src="{pre}img/clients/{E(c["logo"])}" alt="{alt}" loading="lazy"></span>'
+                f'<figcaption>{E(c["name"])}</figcaption></figure></li>')
+
+    # Две ленты навстречу друг другу. Вторая копия списка нужна для бесшовного круга и скрыта от читалок.
+    half = (len(CLIENTS) + 1) // 2
+    rows = [r for r in (CLIENTS[:half], CLIENTS[half:]) if r]
+    lanes = "".join(
+        f'<div class="marquee-lane{" is-reverse" if i else ""}" style="--dur: {max(30, len(r) * 5)}s">'
+        f'<ul class="marquee-track">{"".join(tile(c) for c in r)}</ul>'
+        f'<ul class="marquee-track marquee-copy" aria-hidden="true">{"".join(tile(c, True) for c in r)}</ul></div>'
+        for i, r in enumerate(rows))
     body = f"""<main id="main">
   {page_head(L, pre, U, 'clients', 'head-about', t['clients_h1'], t['clients_lead'])}
-  <section class="container block">
-    <h2>{E(t['clients_h2'])}</h2>
-    <ul class="logo-wall">{logos}</ul>
+  <section class="block clients-block" aria-labelledby="trust-h">
+    <div class="container block-head"><h2 id="trust-h">{E(t['clients_h2'])}</h2>
+      <button class="btn btn-ghost btn-sm marquee-toggle" type="button" data-marquee-toggle>{icon('pause', 'icon i-pause')}{icon('play', 'icon i-play')}<span data-on="{E(t['marquee_pause'])}" data-off="{E(t['marquee_play'])}">{E(t['marquee_pause'])}</span></button>
+    </div>
+    <div class="marquee" data-marquee>{lanes}</div>
   </section>
   {cta_band(L, pre)}
 </main>

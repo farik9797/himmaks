@@ -1,4 +1,71 @@
 {
-  "_how": "Только реальные клиенты, давшие согласие на логотип. Файл логотипа (svg/png/webp) кладём в src/client-logos/. Пока список пуст, страницы «Клиенты» нет на сайте и в меню.",
-  "clients": []
+  "_how": "Только реальные клиенты (список прислал клиент 25.11.2026, client/nam-doveryayut-2026-11-25.docx). Файл логотипа (svg/png/jpg) в src/client-logos/. dark: true — логотип белый, плитка тёмная. Пустой список = страницы «Клиенты» нет на сайте и в меню.",
+  "clients": [
+    {
+      "name": "Kazakhmys",
+      "logo": "kazakhmys.png"
+    },
+    {
+      "name": "KAZ Minerals",
+      "logo": "kaz-minerals.svg"
+    },
+    {
+      "name": "ERG",
+      "logo": "erg.svg"
+    },
+    {
+      "name": "Каустик",
+      "logo": "caustic.svg"
+    },
+    {
+      "name": "KSP Steel",
+      "logo": "kspsteel.png"
+    },
+    {
+      "name": "Майкубенский угольный разрез",
+      "logo": "maikuben.png"
+    },
+    {
+      "name": "Eurasian Foods Corporation",
+      "logo": "efc.svg",
+      "dark": true
+    },
+    {
+      "name": "Жана Роса",
+      "logo": "zhana-rosa.jpg"
+    },
+    {
+      "name": "Нефтехим LTD",
+      "logo": "neftekhim.png"
+    },
+    {
+      "name": "Тотал Сервис",
+      "logo": "totalservice.png"
+    },
+    {
+      "name": "Ертыс Сервис",
+      "logo": "ertys-service.png"
+    },
+    {
+      "name": "Рубиком",
+      "logo": "rubikom.svg"
+    },
+    {
+      "name": "МолКом",
+      "logo": "molkom.svg"
+    },
+    {
+      "name": "Кызылжар Кус",
+      "logo": "kyzylzhar-kus.png"
+    },
+    {
+      "name": "ТемірТас",
+      "logo": "temirtas.png"
+    },
+    {
+      "name": "Fishline",
+      "logo": "fishline.png",
+      "dark": true
+    }
+  ]
 }
