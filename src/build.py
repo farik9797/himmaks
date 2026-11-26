@@ -1701,7 +1701,7 @@ def render_faq(L, U):
 
 
 UI["ru"].update({
-    "clients_nav": "Клиенты",
+    "clients_nav": "Нам доверяют",
     "clients_title": "Клиенты ХИММАКС: компании, которые выбирают нас",
     "clients_desc": "Предприятия и организации Казахстана, которым ХИММАКС поставляет химическую продукцию со склада в Павлодаре.",
     "clients_h1": "Компании, которые выбирают ХИММАКС",
@@ -1710,7 +1710,7 @@ UI["ru"].update({
     "photo": "Фото",
 })
 UI["kz"].update({
-    "clients_nav": "Клиенттер",
+    "clients_nav": "Бізге сенім артады",
     "clients_title": "ХИММАКС клиенттері: бізді таңдайтын компаниялар",
     "clients_desc": "ХИММАКС Павлодардағы қоймадан химиялық өнім жеткізетін Қазақстан кәсіпорындары мен ұйымдары.",
     "clients_h1": "ХИММАКС-ты таңдайтын компаниялар",
@@ -1727,7 +1727,7 @@ def render_clients(L, U):
 
     def tile(c, hidden=False):
         alt = "" if hidden else E(c["name"])
-        return (f'<li><figure class="logo-tile"><span class="logo-box{" is-dark" if c.get("dark") else ""}"><img src="{pre}img/clients/{E(c["logo"])}" alt="{alt}" loading="lazy"></span>'
+        return (f'<li><figure class="logo-tile"><span class="logo-box{" is-dark" if c.get("dark") else ""}"><img src="{pre}img/clients/{E(c["logo"])}" alt="{alt}"{' class="is-round"' if c.get("round") else ""} loading="lazy"></span>'
                 f'<figcaption>{E(c["name"])}</figcaption></figure></li>')
 
     # Две ленты навстречу друг другу. Вторая копия списка нужна для бесшовного круга и скрыта от читалок.

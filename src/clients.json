@@ -66,6 +66,11 @@
       "name": "Fishline",
       "logo": "fishline.png",
       "dark": true
+    },
+    {
+      "name": "КронАгро",
+      "logo": "cronagro.jpg",
+      "round": true
     }
   ]
 }
