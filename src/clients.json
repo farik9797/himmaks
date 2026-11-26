@@ -71,6 +71,10 @@
       "name": "КронАгро",
       "logo": "cronagro.jpg",
       "round": true
+    },
+    {
+      "name": "Қазақстан темір жолы",
+      "logo": "ktz.png"
     }
   ]
 }
