@@ -657,11 +657,15 @@ a.text-link { display: inline-flex; align-items: center; min-height: 44px; }
 .marquee { display: grid; gap: 24px; max-width: var(--container); margin: 32px auto 0; overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, var(--navy-900) 6%, var(--navy-900) 94%, transparent);
           mask-image: linear-gradient(90deg, transparent, var(--navy-900) 6%, var(--navy-900) 94%, transparent); }
-.marquee-lane { display: flex; width: max-content; animation: marquee var(--dur, 40s) linear infinite; }
-.marquee-lane.is-reverse { animation-direction: reverse; }
+.marquee-lane { display: flex; width: max-content; will-change: transform; -webkit-animation: marquee var(--dur, 40s) linear infinite; animation: marquee var(--dur, 40s) linear infinite; }
+.marquee-lane.is-reverse { -webkit-animation-direction: reverse; animation-direction: reverse; }
 .marquee-track { display: flex; gap: 24px; padding-right: 24px; }
-.marquee:hover .marquee-lane, .marquee:focus-within .marquee-lane { animation-play-state: paused; }
-@keyframes marquee { to { transform: translateX(-50%); } }
+/* Пауза наведением только там, где есть мышь: на iPhone касание «залипает» как :hover и лента вставала */
+@media (hover: hover) and (pointer: fine) { .marquee:hover .marquee-lane { animation-play-state: paused; } }
+.marquee:focus-within .marquee-lane { animation-play-state: paused; }
+/* translate3d: Safari держит ленту на отдельном слое и двигает её внутри блока с маской */
+@-webkit-keyframes marquee { from { -webkit-transform: translate3d(0, 0, 0); } to { -webkit-transform: translate3d(-50%, 0, 0); } }
+@keyframes marquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 .logo-tile { display: grid; gap: 12px; width: 224px; margin: 0; text-align: center; }
 .logo-box { display: grid; place-items: center; height: 128px; padding: 20px 24px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); transition: border-color .2s ease, transform .2s ease; }
 .logo-box.is-dark { background: var(--navy-900); border-color: var(--navy-900); }
