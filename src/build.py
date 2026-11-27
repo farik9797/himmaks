@@ -11,6 +11,11 @@ from pathlib import Path
 from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent.parent
+# Версия ассетов по содержимому файла: браузер (особенно Safari на iPhone) не держит старый CSS/JS после правки
+import hashlib
+def asset_ver(name):
+    f = ROOT / "site" / "assets" / name
+    return hashlib.md5(f.read_bytes()).hexdigest()[:8] if f.exists() else "0"
 SRC, OUT = ROOT / "src", ROOT / "site"
 DOMAIN = "https://himmaks.kz"
 PREVIEW = True
@@ -728,7 +733,7 @@ def head(L, title, desc, here, alts, og_image, ld=(), og_type="website", noindex
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Onest:wght@400;600&display=swap">
-<link rel="stylesheet" href="{pre}assets/styles.css">
+<link rel="stylesheet" href="{pre}assets/styles.css?v={asset_ver("styles.css")}">
 {ld_html}
 </head>
 <body>
@@ -851,8 +856,8 @@ def quote_dialog(L, here, product=None, packs=None):
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
-<script src="{pre}assets/app.js" defer></script>
-<script src="{pre}assets/motion.js" defer></script>
+<script src="{pre}assets/app.js?v={asset_ver("app.js")}" defer></script>
+<script src="{pre}assets/motion.js?v={asset_ver("motion.js")}" defer></script>
 </body>
 </html>
 """
