@@ -75,6 +75,20 @@
     {
       "name": "Қазақстан темір жолы",
       "logo": "ktz.png"
+    },
+    {
+      "name": "Павлодарская городская больница №1",
+      "logo": "gorbolnica1.jpg",
+      "round": true
+    },
+    {
+      "name": "Институт судебных экспертиз",
+      "logo": "forensic.jpg",
+      "round": true
+    },
+    {
+      "name": "ПК «Павлодар Құс»",
+      "logo": "pavlodar-kus.jpg"
     }
   ]
 }
