@@ -89,6 +89,29 @@
     {
       "name": "ПК «Павлодар Құс»",
       "logo": "pavlodar-kus.jpg"
+    },
+    {
+      "name": "Глория-Фарм",
+      "logo": "gloria-farm.jpg"
+    },
+    {
+      "name": "Tamina",
+      "logo": "tamina.jpg"
+    },
+    {
+      "name": "Поликлиника №1",
+      "logo": "poliklinika1.jpg",
+      "round": true
+    },
+    {
+      "name": "КХ «БИК»",
+      "logo": "kh-bik.jpg",
+      "round": true
+    },
+    {
+      "name": "Уштерек и К",
+      "logo": "ushterek.jpg",
+      "round": true
     }
   ]
 }
