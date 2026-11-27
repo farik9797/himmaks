@@ -183,3 +183,4 @@
 ## Следующие шаги
 - Согласовать главную, каталог и карточку → страницы «О компании», «Документация», «Доставка и оплата», «Контакты» → WP-тема + ACF Pro (playbook wordpress-acf.md): CPT «Товар», поля из product.json (Repeater: specs, packs, applications, storage; Relationship на CPT «Документ» для общей библиотеки).
 - Импорт товаров с Satu (Python-скрипт, ~70 позиций).
+- 27.11.2026: лента «Нам доверяют» стояла на iPhone. Причина: Safari держал старый styles.css из кеша (адрес без версии). build.py теперь ставит ?v=<md5 8 знаков> к styles.css, app.js, motion.js; лента на translate3d, пауза наведением только при (hover:hover). Проверено в Safari на живом сайте.
